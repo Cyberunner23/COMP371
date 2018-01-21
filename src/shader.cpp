@@ -2,10 +2,29 @@
 #include "shader.hpp"
 
 
-// return
-//    GLuint:      Program ID.
-//    std::string: Printable error message.
-std::string loadShaderProgram(GLuint &programID, std::string shaderName)
+Shader::Shader(std::string shaderName)
+{
+    std::string loadErr = loadShaderProgram(shaderName);
+    if (!loadErr.empty())
+    {
+        std::cout << "ERROR: " << loadErr << std::endl;
+        std::exit(-1);
+    }
+}
+
+Shader::~Shader()
+{
+    glDeleteProgram(_programID);
+}
+
+
+void Shader::useShader()
+{
+    glUseProgram(_programID);
+}
+
+
+std::string Shader::loadShaderProgram(std::string &shaderName)
 {
     GLuint vShaderID;
     GLuint fShaderID;
@@ -13,7 +32,7 @@ std::string loadShaderProgram(GLuint &programID, std::string shaderName)
 
     std::cout << "INFO: Loading shader \"" + shaderName + "\"..." << std::endl;
 
-    programID = glCreateProgram();
+    _programID = glCreateProgram();
 
 
     //Vertex shader
@@ -39,10 +58,10 @@ std::string loadShaderProgram(GLuint &programID, std::string shaderName)
 
 
     //Link the shader
-    glAttachShader(programID, vShaderID);
-    glAttachShader(programID, fShaderID);
+    glAttachShader(_programID, vShaderID);
+    glAttachShader(_programID, fShaderID);
 
-    shaderErr = linkShaderProgram(programID);
+    shaderErr = linkShaderProgram();
     if (!shaderErr.empty())
     {
         return "Failed to link shader program for shader \"" + shaderName + "\": " + shaderErr;
@@ -52,20 +71,20 @@ std::string loadShaderProgram(GLuint &programID, std::string shaderName)
 }
 
 
-std::string linkShaderProgram(GLuint programID)
+std::string Shader::linkShaderProgram()
 {
     GLint linkSuccess = GL_TRUE;
 
-    glLinkProgram(programID);
-    glGetProgramiv(programID, GL_LINK_STATUS, &linkSuccess);
+    glLinkProgram(_programID);
+    glGetProgramiv(_programID, GL_LINK_STATUS, &linkSuccess);
     if (linkSuccess != GL_TRUE) {
 
         std::string logMsg;
         GLint       logLength = 0;
 
-        glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &logLength);
+        glGetProgramiv(_programID, GL_INFO_LOG_LENGTH, &logLength);
         logMsg.reserve((GLuint)logLength + 1);
-        glGetProgramInfoLog(programID, logLength, nullptr, &logMsg[0]);
+        glGetProgramInfoLog(_programID, logLength, nullptr, &logMsg[0]);
 
         return logMsg;
     }

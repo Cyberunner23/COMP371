@@ -1,3 +1,4 @@
+
 #include <iostream>
 #include <vector>
 
@@ -12,8 +13,8 @@
 // Constants
 //------------------------------------------------------------------------------
 
-const int   WindowWidth  = 1280;
-const int   WindowHeight = 720;
+const int   WindowWidth  = 800;
+const int   WindowHeight = 800;
 const char* WindowName   = "COMP371 - Alex Frappier Lachapelle (40019133)";
 
 
@@ -45,14 +46,7 @@ int main(int argc, char** argv)
 
 
     //Load the shader
-    GLuint genericProgramID;
-    std::string shaderErr = loadShaderProgram(genericProgramID, "generic");
-    if (!shaderErr.empty())
-    {
-        std::cout << "ERROR: " << shaderErr << std::endl;
-        glfwTerminate();
-        std::exit(-1);
-    }
+    Shader genericShader("generic");
 
 
     //Setup VAO
@@ -67,10 +61,10 @@ int main(int argc, char** argv)
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*vertices.size(), &vertices[0], GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
-    glUseProgram(genericProgramID);
+    genericShader.useShader();
 
     //Render loop
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -78,12 +72,14 @@ int main(int argc, char** argv)
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glUseProgram(genericProgramID);
-
         glDrawArrays(GL_TRIANGLES, 0, (GLsizei)vertices.size());
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    //DeInit
+    glfwDestroyWindow(window);
+    glfwTerminate();
 
     return 0;
 }
