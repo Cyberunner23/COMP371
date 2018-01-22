@@ -9,7 +9,8 @@
 #include "Camera.hpp"
 #include "objects/AxisLinesObject.hpp"
 #include "objects/TestTriangleObject.hpp"
-
+#include "objects/TestSquareObject.hpp"
+#include "objects/FloorGridObject.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -51,24 +52,35 @@ int main(int argc, char** argv)
     //Create the camera and projection
     glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)WindowWidth / WindowHeight, 0.1f, 100.0f);
     Camera camera;
-    camera.camPos.z = 3.0f;
+    camera.camPos.x = 1.0f;
+    camera.camPos.y = 7.0f;
+    camera.camPos.z = 15.0f;
+    camera.camRot.x = 25.0f;
+    //camera.camRot.x = 20.0f;
     glm::mat4 vpMatrix = projectionMatrix * camera.computeViewMat();
 
     //Load the shader
     Shader genericShader("generic");
 
     AxisLinesObject axisLines(genericShader);
-    TestTriangleObject triangle(genericShader);
-    triangle.setPosition(glm::vec3(0, 0, 0.1));
+    //TestTriangleObject triangle(genericShader);
+    //triangle.setPosition(glm::vec3(0, 0, 0.1));
+    //TestSquareObject square(genericShader);
+    //square.setPosition(glm::vec3(0, 0, 0.1));
+    FloorGridObject floor(genericShader);
+    floor.setPosition(glm::vec3(0.0f, -0.01f, 0.0f));
 
 
     //Render loop
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     while (!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        triangle.render(vpMatrix);
+        //triangle.render(vpMatrix);
+        //square.render(vpMatrix);
+        floor.render(vpMatrix);
+
         axisLines.render(vpMatrix);
 
         glfwSwapBuffers(window);

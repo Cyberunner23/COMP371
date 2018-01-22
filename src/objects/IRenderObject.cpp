@@ -64,7 +64,7 @@ glm::mat4 IRenderObject::computeRotationMatrix(glm::vec3 rot)
 
 glm::mat4 IRenderObject::computeModelMatrix()
 {
-    glm::mat4 translate = glm::translate(glm::mat4(1.0f), -_position);
+    glm::mat4 translate = glm::translate(glm::mat4(1.0f), _position);
     glm::mat4 scale = glm::scale(glm::mat4(1.0f), _scale);
 
     return translate * scale * computeRotationMatrix(_rotation);

@@ -8,21 +8,21 @@ AxisLinesObject::AxisLinesObject(Shader &shader) : IRenderObject(shader)
 {
 
     _mesh = {
-            glm::vec3(0, 0, 0),
-            glm::vec3(1, 0, 0), // X Line
-            glm::vec3(0, 0, 0),
-            glm::vec3(0, 1, 0), // Y Line
-            glm::vec3(0, 0, 0),
-            glm::vec3(0, 0, 1)  // Z Line
+            glm::vec3(0.0f, 0.0f, 0.0f), // X Line
+            glm::vec3(5.0f, 0.0f, 0.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f), // Y Line
+            glm::vec3(0.0f, 5.0f, 0.0f),
+            glm::vec3(0.0f, 0.0f, 0.0f), // Z Line
+            glm::vec3(0.0f, 0.0f, 5.0f),
     };
 
     _lineColors = {
-            glm::vec3(1, 0, 0),
-            glm::vec3(1, 0, 0), // X Line
-            glm::vec3(0, 1, 0),
-            glm::vec3(0, 1, 0), // Y Line
-            glm::vec3(0, 0, 1),
-            glm::vec3(0, 0, 1)  // Z Line
+            glm::vec3(1.0f, 0.0f, 0.0f),
+            glm::vec3(1.0f, 0.0f, 0.0f), // X Line
+            glm::vec3(0.0f, 1.0f, 0.0f),
+            glm::vec3(0.0f, 1.0f, 0.0f), // Y Line
+            glm::vec3(0.0f, 0.0f, 1.0f),
+            glm::vec3(0.0f, 0.0f, 1.0f),  // Z Line
     };
 
     uploadToGPU();
@@ -42,6 +42,7 @@ void AxisLinesObject::render(glm::mat4 vpMatrix)
         std::cout << "ERROR: failed to set the MVP" << std::endl;
     }
 
+    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glDrawArrays(GL_LINES, 0, (GLsizei)_mesh.size());
 
     _shader.unUseShader();
@@ -57,7 +58,7 @@ void AxisLinesObject::uploadToGPU()
     //Vertices
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*_mesh.size(), &_mesh[0], GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
     //Line Colors
