@@ -1,5 +1,5 @@
 
-#include "shader.hpp"
+#include "Shader.hpp"
 
 
 Shader::Shader(std::string shaderName)
@@ -21,6 +21,24 @@ Shader::~Shader()
 void Shader::useShader()
 {
     glUseProgram(_programID);
+}
+
+void Shader::unUseShader()
+{
+    glUseProgram(0);
+}
+
+bool Shader::setUniformM4fv(std::string uniformName, glm::mat4 &matrix)
+{
+    GLint loc = glGetUniformLocation(_programID, uniformName.c_str());
+    if (loc < 0)
+    {
+        return false;
+    }
+
+    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(matrix));
+
+    return true;
 }
 
 

@@ -6,7 +6,10 @@
 #include "glm/common.hpp"
 #include "GLFW/glfw3.h"
 
-#include "shader.hpp"
+#include "Camera.hpp"
+#include "objects/AxisLinesObject.hpp"
+#include "objects/TestTriangleObject.hpp"
+
 
 
 //------------------------------------------------------------------------------
@@ -45,26 +48,19 @@ int main(int argc, char** argv)
     initGL(window);
 
 
+    //Create the camera and projection
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)WindowWidth / WindowHeight, 0.1f, 100.0f);
+    Camera camera;
+    camera.camPos.z = 3.0f;
+    glm::mat4 vpMatrix = projectionMatrix * camera.computeViewMat();
+
     //Load the shader
     Shader genericShader("generic");
 
+    AxisLinesObject axisLines(genericShader);
+    TestTriangleObject triangle(genericShader);
+    triangle.setPosition(glm::vec3(0, 0, 0.1));
 
-    //Setup VAO
-    GLuint VAO;
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    //Setup VBO
-    GLuint VBO;
-    std::vector<glm::vec3> vertices = { glm::vec3(-1,0,0), glm::vec3(0,1,0), glm::vec3(1,0,0) };
-
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*vertices.size(), &vertices[0], GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    glEnableVertexAttribArray(0);
-
-    genericShader.useShader();
 
     //Render loop
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -72,7 +68,9 @@ int main(int argc, char** argv)
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glDrawArrays(GL_TRIANGLES, 0, (GLsizei)vertices.size());
+        triangle.render(vpMatrix);
+        axisLines.render(vpMatrix);
+
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
@@ -132,8 +130,8 @@ GLFWwindow* initWindow()
         std::exit(-1);
     }
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 

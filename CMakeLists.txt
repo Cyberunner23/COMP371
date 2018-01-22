@@ -60,8 +60,16 @@ find_package(OpenGL REQUIRED)
 
 set(SRCS
     src/main.cpp
-    src/shader.hpp
-    src/shader.cpp
+    src/Camera.hpp
+    src/Camera.cpp
+    src/Shader.hpp
+    src/Shader.cpp
+    src/objects/AxisLinesObject.hpp
+    src/objects/AxisLinesObject.cpp
+    src/objects/IRenderObject.hpp
+    src/objects/IRenderObject.cpp
+    src/objects/TestTriangleObject.hpp
+    src/objects/TestTriangleObject.cpp
 )
 
 

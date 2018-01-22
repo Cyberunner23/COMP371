@@ -7,6 +7,8 @@
 #include <vector>
 
 #include "GL/glew.h"
+#include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 
 //
@@ -25,6 +27,9 @@ public:
     ~Shader();
 
     void useShader();
+    void unUseShader();
+
+    bool setUniformM4fv(std::string uniformName, glm::mat4 &matrix);
 
 private:
 
@@ -63,7 +68,6 @@ private:
         shaderData.reserve((unsigned long)fileSize);
         shaderData.assign(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
         shaderDataPtr = shaderData.c_str();
-
 
         //Compile shader
         GLint shaderCompiled = GL_FALSE;
