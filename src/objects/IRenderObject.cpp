@@ -24,7 +24,15 @@ void IRenderObject::render(glm::mat4 vpMatrix)
         std::cout << "ERROR: failed to set the MVP" << std::endl;
     }
 
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    if (_renderMesh)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+    else
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
+
     glDrawArrays(_renderMode, 0, (GLsizei)_mesh.size());
 
     _shader.unUseShader();
@@ -84,7 +92,7 @@ glm::mat4 IRenderObject::computeModelMatrix()
     glm::mat4 translate = glm::translate(glm::mat4(1.0f), _position);
     glm::mat4 scale = glm::scale(glm::mat4(1.0f), _scale);
 
-    return translate * scale * rotate;
+    return translate * rotate * scale;
 }
 
 

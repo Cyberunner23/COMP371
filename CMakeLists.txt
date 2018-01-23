@@ -66,10 +66,12 @@ set(SRCS
     src/Shader.cpp
     src/objects/AxisLinesObject.hpp
     src/objects/AxisLinesObject.cpp
+    src/objects/CubeObject.hpp
+    src/objects/CubeObject.cpp
     src/objects/FloorGridObject.hpp
     src/objects/FloorGridObject.cpp
-    src/objects/TestCubeObject.hpp
-    src/objects/TestCubeObject.cpp
+    src/objects/HorseObject.hpp
+    src/objects/HorseObject.cpp
     src/objects/IRenderObject.hpp
     src/objects/IRenderObject.cpp
     src/objects/TestSquareObject.hpp

@@ -48,12 +48,13 @@ const std::vector<glm::vec3> Cube = {
         glm::vec3(1.0f, 0.0f, 1.0f)
 };
 
-class TestCubeObject : public IRenderObject
+class CubeObject : public IRenderObject
 {
 
 public:
 
-    TestCubeObject() = delete;
-    explicit TestCubeObject(Shader &shader);
+    CubeObject() = delete;
+    explicit CubeObject(Shader &shader);
+    explicit CubeObject(Shader &shader, glm::vec3 color);
 
 };

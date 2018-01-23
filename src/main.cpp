@@ -9,7 +9,8 @@
 #include "Camera.hpp"
 #include "objects/AxisLinesObject.hpp"
 #include "objects/FloorGridObject.hpp"
-#include "objects/TestCubeObject.hpp"
+#include "objects/HorseObject.hpp"
+#include "objects/CubeObject.hpp"
 #include "objects/TestTriangleObject.hpp"
 #include "objects/TestSquareObject.hpp"
 
@@ -37,6 +38,15 @@ void        initGLEW();
 void        initGL(GLFWwindow* window);
 
 
+void handleKeyboardInput(GLFWwindow* window, int key, int scancode, int action, int mods);
+void handleMouseInput(GLFWwindow* window, double xpos, double ypos);
+
+Camera camera;
+const float  camSpeedFactor   = 0.05;
+const float  mouseSensitivity = 1.0;
+double mxPos;
+double myPos;
+
 int main(int argc, char** argv)
 {
     std::cout << "COMP371 Project by Alex Frappier Lachapelle (40019133)" << std::endl;
@@ -52,27 +62,24 @@ int main(int argc, char** argv)
 
     //Create the camera and projection
     glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)WindowWidth / WindowHeight, 0.1f, 100.0f);
-    Camera camera;
-    camera.camPos.x = 3.0f;
-    camera.camPos.y = 7.0f;
-    camera.camPos.z = 15.0f;
-    camera.camRot.x = 25.0f;
-    camera.camRot.y = -10.0f;
+    camera.camPos.x = 0.55f;
+    camera.camPos.y = 0.55f;
+    camera.camPos.z = 2.0f;
     //camera.camRot.x = 20.0f;
-    glm::mat4 vpMatrix = projectionMatrix * camera.computeViewMat();
 
     //Load the shader
     Shader genericShader("generic");
 
     AxisLinesObject axisLines(genericShader);
     //TestTriangleObject triangle(genericShader);
-    //triangle.setPosition(glm::vec3(0, 0, 0.1));
     //TestSquareObject square(genericShader);
-    //square.setPosition(glm::vec3(0, 0, 0.1));
+    //CubeObject cube(genericShader);
+    //cube.setScale(glm::vec3(0.5f, 0.5f, 0.5f));
+    //cube.setPosition(glm::vec3(0.5f, 0.5f, 0.5f));
+    HorseObject horse(genericShader);
+
     FloorGridObject floor(genericShader);
     floor.setPosition(glm::vec3(0.0f, -0.01f, 0.0f));
-
-    TestCubeObject cube(genericShader);
 
 
 
@@ -80,14 +87,16 @@ int main(int argc, char** argv)
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     while (!glfwWindowShouldClose(window))
     {
+        glm::mat4 vpMatrix = projectionMatrix * camera.computeViewMat();
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //triangle.render(vpMatrix);
         //square.render(vpMatrix);
+        //cube.render(vpMatrix);
+        horse.render(vpMatrix);
+
         floor.render(vpMatrix);
-
-        cube.render(vpMatrix);
-
         axisLines.render(vpMatrix);
 
         glfwSwapBuffers(window);
@@ -126,8 +135,23 @@ void glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int 
     }
     else
     {
-        if (action == GLFW_PRESS)
+        if (action == GLFW_PRESS || action == GLFW_REPEAT)
         {
+
+            if (key == GLFW_KEY_W )  {
+                camera.camPos.z += camSpeedFactor;
+            } else if (key == GLFW_KEY_S) {
+                camera.camPos.z -= camSpeedFactor;
+            } else if (key == GLFW_KEY_D) {
+                camera.camPos.x -= camSpeedFactor;
+            } else if (key == GLFW_KEY_A) {
+                camera.camPos.x += camSpeedFactor;
+            } else if (key == GLFW_KEY_SPACE) {
+                camera.camPos.y += camSpeedFactor;
+            } else if (key == GLFW_KEY_LEFT_SHIFT) {
+                camera.camPos.y -= camSpeedFactor;
+            }
+
             switch (key)
             {
                 default:
@@ -136,6 +160,23 @@ void glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int 
         }
     }
 
+}
+
+void handleMouseInput(GLFWwindow* window, double xpos, double ypos) {
+
+    camera.camRot.x += mouseSensitivity * (ypos - myPos);
+    camera.camRot.y += mouseSensitivity * (xpos - mxPos);
+
+    if (camera.camRot.x > 90.0f) {
+        camera.camRot.x = 90.0f;
+    }
+    if (camera.camRot.x < -90.0f) {
+        camera.camRot.x = -90.0f;
+    }
+
+    mxPos = xpos;
+    myPos = ypos;
+    //std::cout << mxPos << ":" << myPos << " " << camera.camRot.x << ":" << camera.camRot.y << std::endl;
 }
 
 GLFWwindow* initWindow()
@@ -160,6 +201,8 @@ GLFWwindow* initWindow()
     glfwSwapInterval(1);
 
     glfwSetKeyCallback(window, glfwKeyCallback);
+    glfwGetCursorPos(window, &mxPos, &myPos);
+    glfwSetCursorPosCallback(window, handleMouseInput);
 
     return window;
 }

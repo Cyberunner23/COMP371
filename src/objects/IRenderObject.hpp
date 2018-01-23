@@ -17,7 +17,7 @@ public:
     explicit IRenderObject(Shader &shader);
 
 
-    void render(glm::mat4 vpMatrix);
+    virtual void render(glm::mat4 vpMatrix);
 
     glm::vec3 getPosition();
     void setPosition(glm::vec3 pos);
@@ -34,6 +34,7 @@ public:
 protected:
 
     GLenum _renderMode = GL_TRIANGLES;
+    bool _renderMesh = false;
 
     GLuint _VAO;
     GLuint _VBO;
@@ -51,7 +52,7 @@ protected:
 
 protected:
 
-    void uploadToGPU();
+    virtual void uploadToGPU();
 
 private:
 
