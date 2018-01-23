@@ -68,6 +68,8 @@ set(SRCS
     src/objects/AxisLinesObject.cpp
     src/objects/FloorGridObject.hpp
     src/objects/FloorGridObject.cpp
+    src/objects/TestCubeObject.hpp
+    src/objects/TestCubeObject.cpp
     src/objects/IRenderObject.hpp
     src/objects/IRenderObject.cpp
     src/objects/TestSquareObject.hpp

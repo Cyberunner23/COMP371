@@ -1,6 +1,3 @@
-//
-// Created by cyberunner23 on 1/21/18.
-//
 
 #include "Camera.hpp"
 

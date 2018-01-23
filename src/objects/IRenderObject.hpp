@@ -17,7 +17,7 @@ public:
     explicit IRenderObject(Shader &shader);
 
 
-    virtual void render(glm::mat4 pvMatrix) = 0;
+    void render(glm::mat4 vpMatrix);
 
     glm::vec3 getPosition();
     void setPosition(glm::vec3 pos);
@@ -33,6 +33,8 @@ public:
 
 protected:
 
+    GLenum _renderMode = GL_TRIANGLES;
+
     GLuint _VAO;
     GLuint _VBO;
     GLuint _CBO;
@@ -45,10 +47,14 @@ protected:
     Shader _shader;
 
     std::vector<glm::vec3> _mesh;
+    std::vector<glm::vec3> _colors;
+
+protected:
+
+    void uploadToGPU();
 
 private:
 
-    glm::mat4 computeRotationMatrix(glm::vec3 rot);
     glm::mat4 computeModelMatrix();
 
 };

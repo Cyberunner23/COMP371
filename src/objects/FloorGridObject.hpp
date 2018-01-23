@@ -31,14 +31,7 @@ public:
     FloorGridObject() = delete;
     explicit FloorGridObject(Shader &shader);
 
-    virtual void render(glm::mat4 pvMatrix);
-
-
 private:
-
-    std::vector<glm::vec3> _colors;
-
-    void uploadToGPU();
 
     void generateSquare(int posX, int posY);
 

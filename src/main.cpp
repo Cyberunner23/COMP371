@@ -8,9 +8,10 @@
 
 #include "Camera.hpp"
 #include "objects/AxisLinesObject.hpp"
+#include "objects/FloorGridObject.hpp"
+#include "objects/TestCubeObject.hpp"
 #include "objects/TestTriangleObject.hpp"
 #include "objects/TestSquareObject.hpp"
-#include "objects/FloorGridObject.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -52,10 +53,11 @@ int main(int argc, char** argv)
     //Create the camera and projection
     glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)WindowWidth / WindowHeight, 0.1f, 100.0f);
     Camera camera;
-    camera.camPos.x = 1.0f;
+    camera.camPos.x = 3.0f;
     camera.camPos.y = 7.0f;
     camera.camPos.z = 15.0f;
     camera.camRot.x = 25.0f;
+    camera.camRot.y = -10.0f;
     //camera.camRot.x = 20.0f;
     glm::mat4 vpMatrix = projectionMatrix * camera.computeViewMat();
 
@@ -70,6 +72,9 @@ int main(int argc, char** argv)
     FloorGridObject floor(genericShader);
     floor.setPosition(glm::vec3(0.0f, -0.01f, 0.0f));
 
+    TestCubeObject cube(genericShader);
+
+
 
     //Render loop
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -80,6 +85,8 @@ int main(int argc, char** argv)
         //triangle.render(vpMatrix);
         //square.render(vpMatrix);
         floor.render(vpMatrix);
+
+        cube.render(vpMatrix);
 
         axisLines.render(vpMatrix);
 
