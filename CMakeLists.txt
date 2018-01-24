@@ -64,6 +64,8 @@ set(SRCS
     src/Camera.cpp
     src/Shader.hpp
     src/Shader.cpp
+    src/Window.hpp
+    src/Window.cpp
     src/objects/AxisLinesObject.hpp
     src/objects/AxisLinesObject.cpp
     src/objects/CubeObject.hpp

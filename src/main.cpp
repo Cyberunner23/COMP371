@@ -7,6 +7,7 @@
 #include "GLFW/glfw3.h"
 
 #include "Camera.hpp"
+#include "Window.hpp"
 #include "objects/AxisLinesObject.hpp"
 #include "objects/FloorGridObject.hpp"
 #include "objects/HorseObject.hpp"
@@ -19,29 +20,23 @@
 // Constants
 //------------------------------------------------------------------------------
 
-const int   WindowWidth  = 800;
-const int   WindowHeight = 800;
-const char* WindowName   = "COMP371 - Alex Frappier Lachapelle (40019133)";
-
+const int InitWindowWidth  = 800;
+const int InitWindowHeight = 800;
 
 //------------------------------------------------------------------------------
 // Function prototypes
 //------------------------------------------------------------------------------
 
 //Callbacks
-void glfwErrorCallback(int error, const char* description);
-void glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
-
-//Utils
-GLFWwindow* initWindow();
-void        initGLEW();
-void        initGL(GLFWwindow* window);
+void windowSizeCallback(GLFWwindow *window, int width, int height);
+void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+void mousePosCallback(GLFWwindow *window, double xpos, double ypos);
 
 
-void handleKeyboardInput(GLFWwindow* window, int key, int scancode, int action, int mods);
-void handleMouseInput(GLFWwindow* window, double xpos, double ypos);
+std::unique_ptr<Window> window;
+std::unique_ptr<Camera> camera;
+std::unique_ptr<HorseObject> horse;
 
-Camera camera;
 const float  camSpeedFactor   = 0.05;
 const float  mouseSensitivity = 1.0;
 double mxPos;
@@ -49,23 +44,16 @@ double myPos;
 
 int main(int argc, char** argv)
 {
-    std::cout << "COMP371 Project by Alex Frappier Lachapelle (40019133)" << std::endl;
 
-    std::cout << "INFO: Initializing window..." << std::endl;
-    GLFWwindow* window = initWindow();
+    window = std::make_unique<Window>(InitWindowWidth, InitWindowHeight, "COMP371 Project by Alex Frappier Lachapelle (40019133)");
+    camera = std::make_unique<Camera>(InitWindowWidth, InitWindowHeight, 45.0f);
 
-    std::cout << "INFO: Initializing GLEW..." << std::endl;
-    initGLEW();
-
-    initGL(window);
-
+    window->setWindowSizeCallback(windowSizeCallback);
+    window->setKeyCallback(keyCallback);
+    window->setMousePosCallback(mousePosCallback);
 
     //Create the camera and projection
-    glm::mat4 projectionMatrix = glm::perspective(glm::radians(45.0f), (float)WindowWidth / WindowHeight, 0.1f, 100.0f);
-    camera.camPos.x = 0.55f;
-    camera.camPos.y = 0.55f;
-    camera.camPos.z = 2.0f;
-    //camera.camRot.x = 20.0f;
+    camera->setPos(glm::vec3(0.55f, 0.55f, 2.0f));
 
     //Load the shader
     Shader genericShader("generic");
@@ -76,155 +64,191 @@ int main(int argc, char** argv)
     //CubeObject cube(genericShader);
     //cube.setScale(glm::vec3(0.5f, 0.5f, 0.5f));
     //cube.setPosition(glm::vec3(0.5f, 0.5f, 0.5f));
-    HorseObject horse(genericShader);
+    horse = std::make_unique<HorseObject>(genericShader);
 
     FloorGridObject floor(genericShader);
     floor.setPosition(glm::vec3(0.0f, -0.01f, 0.0f));
 
 
-
     //Render loop
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    while (!glfwWindowShouldClose(window))
+    while (!window->shouldClose())
     {
-        glm::mat4 vpMatrix = projectionMatrix * camera.computeViewMat();
+        window->pollEvents();
+
+        glm::mat4 vpMatrix = camera->getViewProjectionMatrix();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //triangle.render(vpMatrix);
         //square.render(vpMatrix);
         //cube.render(vpMatrix);
-        horse.render(vpMatrix);
+        horse->render(vpMatrix);
 
         floor.render(vpMatrix);
         axisLines.render(vpMatrix);
 
-        glfwSwapBuffers(window);
+        window->swapBuffers();
         glfwPollEvents();
     }
-
-    //DeInit
-    glfwDestroyWindow(window);
-    glfwTerminate();
 
     return 0;
 }
 
 
-void glfwErrorCallback(int error, const char* description)
+void windowSizeCallback(GLFWwindow *glfwWindow, int width, int height)
 {
-    std::cout << "ERROR: GLFW encountered error ID: " << error << ", which translates to: " << description << std::endl;
+    window->onWindowResize(width, height);
+    camera->onWindowResize(width, height);
 }
 
-void glfwKeyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
+void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
 
-    if (mods == GLFW_MOD_CONTROL)
+    if (action == GLFW_PRESS || action == GLFW_REPEAT)
     {
-        if (action == GLFW_PRESS)
+
+        if (mods == GLFW_MOD_CONTROL)
+        {
+            if (action == GLFW_PRESS)
+            {
+                switch (key)
+                {
+                    case GLFW_KEY_Q:
+                        glfwSetWindowShouldClose(window, GLFW_TRUE);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+        else if (mods == GLFW_MOD_SHIFT)
         {
             switch (key)
             {
+                case GLFW_KEY_W:
+                {
+                    glm::vec3 hPosition = horse->getPosition();
+                    hPosition = glm::vec3(hPosition.x , hPosition.y, hPosition.z - 1.0f);
+                    horse->setPosition(hPosition);
+                    break;
+                }
+                case GLFW_KEY_S:
+                {
+                    glm::vec3 hPosition = horse->getPosition();
+                    hPosition = glm::vec3(hPosition.x, hPosition.y, hPosition.z + 1.0f);
+                    horse->setPosition(hPosition);
+                    break;
+                }
+                case GLFW_KEY_D:
+                {
+                    glm::vec3 hPosition = horse->getPosition();
+                    hPosition = glm::vec3(hPosition.x + 1.0f, hPosition.y, hPosition.z);
+                    horse->setPosition(hPosition);
+                    break;
+                }
+                case GLFW_KEY_A:
+                {
+                    glm::vec3 hPosition = horse->getPosition();
+                    hPosition = glm::vec3(hPosition.x - 1.0f, hPosition.y, hPosition.z);
+                    horse->setPosition(hPosition);
+                    break;
+                }
+                default:
+                    break;
+            }
+        }
+        else
+        {
+
+            glm::vec3 position = camera->getPos();
+
+            switch (key)
+            {
+                case GLFW_KEY_W:
+                {
+                    glm::vec3 hRotation = horse->getRotation();
+                    hRotation = glm::vec3(hRotation.x, hRotation.y, hRotation.z - 5.0f);
+                    horse->setRotation(hRotation);
+                    break;
+                }
+                case GLFW_KEY_S:
+                {
+                    glm::vec3 hRotation = horse->getRotation();
+                    hRotation = glm::vec3(hRotation.x, hRotation.y, hRotation.z + 5.0f);
+                    horse->setRotation(hRotation);
+                    break;
+                }
+                case GLFW_KEY_D:
+                {
+                    glm::vec3 hRotation = horse->getRotation();
+                    hRotation = glm::vec3(hRotation.x, hRotation.y - 5.0f, hRotation.z);
+                    horse->setRotation(hRotation);
+                    break;
+                }
+                case GLFW_KEY_A:
+                {
+                    glm::vec3 hRotation = horse->getRotation();
+                    hRotation = glm::vec3(hRotation.x, hRotation.y + 5.0f, hRotation.z);
+                    horse->setRotation(hRotation);
+                    break;
+                }
                 case GLFW_KEY_Q:
-                    glfwSetWindowShouldClose(window, GLFW_TRUE);
+                    position.y += camSpeedFactor;
                     break;
+                case GLFW_KEY_E:
+                    position.y -= camSpeedFactor;
+                    break;
+                case GLFW_KEY_SPACE:
+                {
+                    int min = -51;
+                    int max = 49;
+                    int x = min + (rand() % (max - min + 1));
+                    int z = min + (rand() % (max - min + 1));
+                    horse->setPosition(glm::vec3(x, 0, z));
+                    break;
+                }
+                case GLFW_KEY_U:
+                {
+                    glm::vec3 scale = horse->getScale();
+                    scale += 0.05f;
+                    horse->setScale(scale);
+                    break;
+                }
+                case GLFW_KEY_J:
+                {
+                    glm::vec3 scale = horse->getScale();
+                    scale -= 0.05f;
+                    horse->setScale(scale);
+                    break;
+                }
                 default:
                     break;
             }
+
+            camera->setPos(position);
         }
     }
-    else
-    {
-        if (action == GLFW_PRESS || action == GLFW_REPEAT)
-        {
-
-            if (key == GLFW_KEY_W )  {
-                camera.camPos.z += camSpeedFactor;
-            } else if (key == GLFW_KEY_S) {
-                camera.camPos.z -= camSpeedFactor;
-            } else if (key == GLFW_KEY_D) {
-                camera.camPos.x -= camSpeedFactor;
-            } else if (key == GLFW_KEY_A) {
-                camera.camPos.x += camSpeedFactor;
-            } else if (key == GLFW_KEY_SPACE) {
-                camera.camPos.y += camSpeedFactor;
-            } else if (key == GLFW_KEY_LEFT_SHIFT) {
-                camera.camPos.y -= camSpeedFactor;
-            }
-
-            switch (key)
-            {
-                default:
-                    break;
-            }
-        }
-    }
-
 }
 
-void handleMouseInput(GLFWwindow* window, double xpos, double ypos) {
+void mousePosCallback(GLFWwindow *window, double xpos, double ypos)
+{
 
-    camera.camRot.x += mouseSensitivity * (ypos - myPos);
-    camera.camRot.y += mouseSensitivity * (xpos - mxPos);
+    glm::vec3 rotation = camera->getRot();
 
-    if (camera.camRot.x > 90.0f) {
-        camera.camRot.x = 90.0f;
+    rotation.y += mouseSensitivity * (xpos - mxPos);
+    rotation.x += mouseSensitivity * (ypos - myPos);
+
+    if (rotation.x > 90.0f) {
+        rotation.x = 90.0f;
     }
-    if (camera.camRot.x < -90.0f) {
-        camera.camRot.x = -90.0f;
+    if (rotation.x < -90.0f) {
+        rotation.x = -90.0f;
     }
+
+    camera->setRot(rotation);
 
     mxPos = xpos;
     myPos = ypos;
-    //std::cout << mxPos << ":" << myPos << " " << camera.camRot.x << ":" << camera.camRot.y << std::endl;
-}
-
-GLFWwindow* initWindow()
-{
-    //Set error callback
-    glfwSetErrorCallback(glfwErrorCallback);
-
-    //GLFW Init
-    if (!glfwInit())
-    {
-        std::exit(-1);
-    }
-
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    GLFWwindow* window = glfwCreateWindow(WindowHeight, WindowWidth, WindowName, nullptr, nullptr);
-
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1);
-
-    glfwSetKeyCallback(window, glfwKeyCallback);
-    glfwGetCursorPos(window, &mxPos, &myPos);
-    glfwSetCursorPosCallback(window, handleMouseInput);
-
-    return window;
-}
-
-void initGLEW()
-{
-    glewExperimental = GL_TRUE;
-    GLenum glewErr = glewInit();
-
-    if (glewErr != GLEW_OK) {
-        std::cout << "ERROR: Failed to initialize GLEW: " << glewGetErrorString(glewErr) << std::endl;
-        glfwTerminate();
-        std::exit(-1);
-    }
-}
-
-void initGL(GLFWwindow* window)
-{
-    int height, width;
-
-    glfwGetFramebufferSize(window, &width, &height);
-    glViewport(0, 0, width, height);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
+    std::cout << mxPos << ":" << myPos << " " << rotation.x << ":" << rotation.y << std::endl;
 }
