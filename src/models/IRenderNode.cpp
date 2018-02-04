@@ -1,11 +1,10 @@
 
-#include "IRenderObject.hpp"
+#include "IRenderNode.hpp"
 
-IRenderObject::IRenderObject(Shader &shader) : _position(0.0f, 0.0f, 0.0f),
-                                              _scale(1.0f, 1.0f, 1.0f),
-                                              _rotation(0.0f, 0.0f, 0.0f),
-                                              _modelMatrix(computeModelMatrix()),
-                                              _shader(shader)
+IRenderNode::IRenderNode() : _position(0.0f, 0.0f, 0.0f),
+                             _scale(1.0f, 1.0f, 1.0f),
+                             _rotation(0.0f, 0.0f, 0.0f),
+                             _modelMatrix(computeModelMatrix())
 {
     glGenVertexArrays(1, &_VAO);
     glGenBuffers(1, &_VBO);
@@ -13,68 +12,74 @@ IRenderObject::IRenderObject(Shader &shader) : _position(0.0f, 0.0f, 0.0f),
 }
 
 
-void IRenderObject::render(glm::mat4 vpMatrix, GLenum polygonMode)
+void IRenderNode::addChildNode(std::shared_ptr<IRenderNode> node)
 {
-    glBindVertexArray(_VAO);
-    _shader.useShader();
-
-    glm::mat4 MVP = vpMatrix * _modelMatrix;
-    if (!_shader.setUniformM4fv("MVP", MVP))
-    {
-        std::cout << "ERROR: failed to set the MVP" << std::endl;
-    }
-
-    glPolygonMode(GL_FRONT_AND_BACK, polygonMode);
-
-    glDrawArrays(_renderMode, 0, (GLsizei)_mesh.size());
-
-    _shader.unUseShader();
-    glBindVertexArray(0);
+    _childNodes.push_back(node);
 }
 
+std::vector<std::shared_ptr<IRenderNode>>* IRenderNode::getChildren()
+{
+    return &_childNodes;
+}
 
-glm::vec3 IRenderObject::getPosition()
+glm::vec3 IRenderNode::getPosition()
 {
     return _position;
 }
 
-void IRenderObject::setPosition(glm::vec3 pos)
+void IRenderNode::setPosition(glm::vec3&& pos)
 {
-    _position = pos;
+    _position = std::move(pos);
     _modelMatrix = computeModelMatrix();
 }
 
 
-glm::vec3 IRenderObject::getScale()
+glm::vec3 IRenderNode::getScale()
 {
     return _scale;
 }
 
-void IRenderObject::setScale(glm::vec3 scale)
+void IRenderNode::setScale(glm::vec3&& scale)
 {
-    _scale = scale;
+    _scale = std::move(scale);
     _modelMatrix = computeModelMatrix();
 }
 
 
-glm::vec3 IRenderObject::getRotation()
+glm::vec3 IRenderNode::getRotation()
 {
     return _rotation;
 }
 
-void IRenderObject::setRotation(glm::vec3 rotation)
+void IRenderNode::setRotation(glm::vec3&& rotation)
 {
-    _rotation = rotation;
+    _rotation = std::move(rotation);
     _modelMatrix = computeModelMatrix();
 }
 
 
-glm::mat4 IRenderObject::getModelMatrix()
+GLuint IRenderNode::getVAO()
+{
+    return _VAO;
+}
+
+GLenum IRenderNode::getRenderMode()
+{
+    return _renderMode;
+}
+
+GLsizei IRenderNode::getMeshSize()
+{
+    return (GLsizei)_mesh.size();
+}
+
+glm::mat4 IRenderNode::getModelMatrix()
 {
     return _modelMatrix;
 }
 
-glm::mat4 IRenderObject::computeModelMatrix()
+
+glm::mat4 IRenderNode::computeModelMatrix()
 {
     glm::mat4 rotX = glm::rotate(glm::mat4(1.0f), glm::radians(_rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
     glm::mat4 rotY = glm::rotate(glm::mat4(1.0f), glm::radians(_rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -89,7 +94,7 @@ glm::mat4 IRenderObject::computeModelMatrix()
 }
 
 
-void IRenderObject::uploadToGPU()
+void IRenderNode::uploadToGPU()
 {
     glBindVertexArray(_VAO);
 

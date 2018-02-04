@@ -15,7 +15,7 @@ public:
     HorseObject() = delete;
     explicit HorseObject(Shader &shader);
 
-    virtual void render(glm::mat4 vpMatrix);
+    virtual void render(glm::mat4 vpMatrix, GLenum polygonMode);
 
 private:
 

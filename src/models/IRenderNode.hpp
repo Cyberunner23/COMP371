@@ -1,35 +1,37 @@
 
 #pragma once
 
+#include <iostream>
+#include <memory>
 #include <vector>
 
 #include "GL/glew.h"
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
 
-#include "../Shader.hpp"
-
-class IRenderObject
+class IRenderNode
 {
 
 public:
 
-    explicit IRenderObject(Shader &shader);
+    IRenderNode();
 
-
-    virtual void render(glm::mat4 vpMatrix, GLenum polygonMode);
+    void addChildNode(std::shared_ptr<IRenderNode> node);
+    std::vector<std::shared_ptr<IRenderNode>>* getChildren();
 
     glm::vec3 getPosition();
-    void setPosition(glm::vec3 pos);
+    void setPosition(glm::vec3&& pos);
 
     glm::vec3 getScale();
-    void setScale(glm::vec3 scale);
+    void setScale(glm::vec3&& scale);
 
     glm::vec3 getRotation();
-    void setRotation(glm::vec3 rotation);
+    void setRotation(glm::vec3&& rotation);
 
+    GLuint getVAO();
+    GLenum getRenderMode();
+    GLsizei getMeshSize();
     glm::mat4 getModelMatrix();
-
 
 protected:
 
@@ -44,12 +46,10 @@ protected:
     glm::vec3 _rotation;
     glm::mat4 _modelMatrix;
 
-    Shader _shader;
-
     std::vector<glm::vec3> _mesh;
     std::vector<glm::vec3> _colors;
 
-protected:
+    std::vector<std::shared_ptr<IRenderNode>> _childNodes;
 
     virtual void uploadToGPU();
 

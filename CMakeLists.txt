@@ -62,25 +62,30 @@ set(SRCS
     src/main.cpp
     src/Camera.hpp
     src/Camera.cpp
+    src/Renderer.hpp
+    src/Renderer.cpp
     src/Shader.hpp
     src/Shader.cpp
     src/Window.hpp
     src/Window.cpp
+    src/models/IRenderNode.hpp
+    src/models/IRenderNode.cpp
+    src/models/TestSquareObject.hpp
+    src/models/TestSquareObject.cpp
     src/objects/AxisLinesObject.hpp
     src/objects/AxisLinesObject.cpp
-    src/objects/CubeObject.hpp
-    src/objects/CubeObject.cpp
-    src/objects/FloorGridObject.hpp
-    src/objects/FloorGridObject.cpp
-    src/objects/HorseObject.hpp
-    src/objects/HorseObject.cpp
+    #src/objects/CubeObject.hpp
+    #src/objects/CubeObject.cpp
+    #src/objects/FloorGridObject.hpp
+    #src/objects/FloorGridObject.cpp
+    #src/objects/HorseObject.hpp
+    #src/objects/HorseObject.cpp
     src/objects/IRenderObject.hpp
     src/objects/IRenderObject.cpp
-    src/objects/TestSquareObject.hpp
-    src/objects/TestSquareObject.cpp
-    src/objects/TestTriangleObject.hpp
-    src/objects/TestTriangleObject.cpp
-)
+#
+    #src/objects/TestTriangleObject.hpp
+    #src/objects/TestTriangleObject.cpp
+    src/models/SceneRoot.hpp)
 
 
 #------------------------------------------------------------------------------

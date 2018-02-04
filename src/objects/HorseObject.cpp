@@ -54,12 +54,12 @@ HorseObject::HorseObject(Shader &shader) : IRenderObject(shader)
 
 }
 
-void HorseObject::render(glm::mat4 vpMatrix)
+void HorseObject::render(glm::mat4 vpMatrix, GLenum polygonMode)
 {
 
     for (const std::shared_ptr<IRenderObject> &part : _parts)
     {
-        part->render(vpMatrix * _modelMatrix);
+        part->render(vpMatrix * _modelMatrix, polygonMode);
     }
 }
 
