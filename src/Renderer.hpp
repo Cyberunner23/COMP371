@@ -9,7 +9,9 @@
 #include "glm/gtx/transform.hpp"
 
 #include "Shader.hpp"
-#include "models/IRenderNode.hpp"
+#include "ShaderGuard.hpp"
+#include "VAOGuard.hpp"
+#include "objects/IRenderNode.hpp"
 
 /*
  * Doing hierachical rendering using a recursive method

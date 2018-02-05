@@ -1,12 +1,9 @@
-//
-// Created by cyberunner23 on 1/21/18.
-//
 
-#include "AxisLinesObject.hpp"
+#include "AxisLines.hpp"
 
-AxisLinesObject::AxisLinesObject(Shader &shader) : IRenderObject(shader)
+AxisLines::AxisLines()
 {
-
+    _debugName = "AxisLines";
     _renderMode = GL_LINES;
 
     _mesh = {
@@ -28,5 +25,4 @@ AxisLinesObject::AxisLinesObject(Shader &shader) : IRenderObject(shader)
     };
 
     uploadToGPU();
-
 }

@@ -4,16 +4,23 @@
 IRenderNode::IRenderNode() : _position(0.0f, 0.0f, 0.0f),
                              _scale(1.0f, 1.0f, 1.0f),
                              _rotation(0.0f, 0.0f, 0.0f),
-                             _modelMatrix(computeModelMatrix())
+                             _modelMatrix(computeModelMatrix()),
+                             _debugName("")
 {
     glGenVertexArrays(1, &_VAO);
     glGenBuffers(1, &_VBO);
     glGenBuffers(1, &_CBO);
 }
 
+IRenderNode::IRenderNode(std::string name) : IRenderNode()
+{
+    _debugName = name;
+}
+
 
 void IRenderNode::addChildNode(std::shared_ptr<IRenderNode> node)
 {
+    std::cout << _debugName << " -> " << node->_debugName << std::endl;
     _childNodes.push_back(node);
 }
 
@@ -90,7 +97,15 @@ glm::mat4 IRenderNode::computeModelMatrix()
     glm::mat4 translate = glm::translate(glm::mat4(1.0f), _position);
     glm::mat4 scale = glm::scale(glm::mat4(1.0f), _scale);
 
-    return translate * rotate * scale;
+    return  translate * scale * rotate;
+
+    /*glm::mat4 matrix = glm::scale(glm::mat4(1.0f), _scale);
+    matrix = glm::translate(matrix, _position);
+    matrix = glm::rotate(matrix, glm::radians(_rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
+    matrix = glm::rotate(matrix, glm::radians(_rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
+    matrix = glm::rotate(matrix, glm::radians(_rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
+
+    return matrix;*/
 }
 
 

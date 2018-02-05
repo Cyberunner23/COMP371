@@ -66,26 +66,18 @@ set(SRCS
     src/Renderer.cpp
     src/Shader.hpp
     src/Shader.cpp
+    src/ShaderGuard.hpp
+    src/VAOGuard.hpp
     src/Window.hpp
     src/Window.cpp
-    src/models/IRenderNode.hpp
-    src/models/IRenderNode.cpp
-    src/models/TestSquareObject.hpp
-    src/models/TestSquareObject.cpp
-    src/objects/AxisLinesObject.hpp
-    src/objects/AxisLinesObject.cpp
-    #src/objects/CubeObject.hpp
-    #src/objects/CubeObject.cpp
-    #src/objects/FloorGridObject.hpp
-    #src/objects/FloorGridObject.cpp
-    #src/objects/HorseObject.hpp
-    #src/objects/HorseObject.cpp
-    src/objects/IRenderObject.hpp
-    src/objects/IRenderObject.cpp
+    src/objects/IRenderNode.hpp
+    src/objects/IRenderNode.cpp
+    src/objects/TestSquare.hpp
+    src/objects/TestSquare.cpp
 #
     #src/objects/TestTriangleObject.hpp
     #src/objects/TestTriangleObject.cpp
-    src/models/SceneRoot.hpp)
+    src/objects/SceneRoot.hpp src/objects/FloorGrid.cpp src/objects/FloorGrid.hpp src/objects/AxisLines.cpp src/objects/AxisLines.hpp src/objects/Horse.cpp src/objects/Horse.hpp src/objects/Cube.cpp src/objects/Cube.hpp)
 
 
 #------------------------------------------------------------------------------

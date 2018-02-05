@@ -5,13 +5,8 @@
 
 class SceneRoot : public IRenderNode
 {
-
 public:
-
-    SceneRoot() = default;
-
+    SceneRoot() {_debugName = "SceneRoot";}
 private:
-
     virtual void uploadToGPU() {}
-
 };

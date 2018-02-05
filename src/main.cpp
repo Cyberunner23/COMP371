@@ -9,13 +9,11 @@
 #include "Camera.hpp"
 #include "Renderer.hpp"
 #include "Window.hpp"
-#include "models/SceneRoot.hpp"
-#include "objects/AxisLinesObject.hpp"
-//#include "objects/FloorGridObject.hpp"
-//#include "objects/HorseObject.hpp"
-//#include "objects/CubeObject.hpp"
-//#include "objects/TestTriangleObject.hpp"
-#include "models/TestSquareObject.hpp"
+#include "objects/AxisLines.hpp"
+#include "objects/Cube.hpp"
+#include "objects/Horse.hpp"
+#include "objects/SceneRoot.hpp"
+#include "objects/FloorGrid.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -61,39 +59,25 @@ int main(int argc, char** argv)
 
     //Load the shader
     std::unique_ptr<Shader> genericShader = std::make_unique<Shader>("generic");
-
-    Shader shader2("generic");
-
-    AxisLinesObject axisLines(shader2);
-    //TestTriangleObject triangle(genericShader);
-    //TestSquareObject square(genericShader);
-    //CubeObject cube(genericShader);
-    //cube.setScale(glm::vec3(0.5f, 0.5f, 0.5f));
-    //cube.setPosition(glm::vec3(0.5f, 0.5f, 0.5f));
-    //horse = std::make_unique<HorseObject>(*genericShader);
-
-    //FloorGridObject floor(*genericShader);
-    //floor.setPosition(glm::vec3(0.0f, -0.01f, 0.0f));
-
-
-
     Renderer renderer(std::move(genericShader));
 
-
-
     std::shared_ptr<SceneRoot> sceneRoot = std::make_shared<SceneRoot>();
+    std::shared_ptr<AxisLines> axis = std::make_shared<AxisLines>();
+    std::shared_ptr<FloorGrid> floorGrid = std::make_shared<FloorGrid>();
+    std::shared_ptr<Horse> horse = std::make_shared<Horse>() ;
 
 
-    std::shared_ptr<TestSquareObject> square = std::make_shared<TestSquareObject>();
-    std::shared_ptr<TestSquareObject> square2 = std::make_shared<TestSquareObject>();
-    square2->setPosition(glm::vec3(0.5f, 0.0f, 0.0f));
-    square->addChildNode(square2);
-    square->setPosition(glm::vec3(0.1f, 0.5f, 0.0f));
+    floorGrid->setPosition(glm::vec3(0.0f, -0.005f, 0.0f));
+    sceneRoot->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
+    sceneRoot->setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
-    sceneRoot->addChildNode(square);
-    sceneRoot->setPosition(glm::vec3(-0.4f, -0.3f, 0.0f));
+    sceneRoot->addChildNode(floorGrid);
+    sceneRoot->addChildNode(horse);
 
     //renderer.addRenderObject(square);
+    //renderer.addRenderObject(floorGrid);
+    //renderer.addRenderObject(axis);
+    renderer.addRenderObject(axis);
     renderer.addRenderObject(sceneRoot);
 
 
@@ -107,14 +91,6 @@ int main(int argc, char** argv)
         glm::mat4 vpMatrix = camera->getViewProjectionMatrix();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        //triangle.render(vpMatrix);
-        //square.render(vpMatrix);
-        //cube.render(vpMatrix);
-        //horse->render(vpMatrix, polygonMode);
-
-        //floor.render(vpMatrix, polygonMode);
-        axisLines.render(vpMatrix, polygonMode);
 
         renderer.render(vpMatrix);
 

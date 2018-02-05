@@ -1,11 +1,7 @@
 
 #pragma once
 
-#include "IRenderObject.hpp"
-
-//------------------------------------------------------------------------------
-// Constants
-//------------------------------------------------------------------------------
+#include "IRenderNode.hpp"
 
 const glm::vec3 evenColor(0.3164f, 0.3242f, 0.3359f);
 const glm::vec3 oddColor(0.7031f, 0.7109f, 0.7266f);
@@ -23,16 +19,10 @@ const std::vector<glm::vec3> squareXZ = {
         glm::vec3(1.0f, 0.0f, 1.0f),
 };
 
-class FloorGridObject : public IRenderObject
+class FloorGrid : public IRenderNode
 {
-
 public:
-
-    FloorGridObject() = delete;
-    explicit FloorGridObject(Shader &shader);
-
+    FloorGrid();
 private:
-
     void generateSquare(int posX, int posY);
-
 };

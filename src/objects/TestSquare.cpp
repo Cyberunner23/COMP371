@@ -2,10 +2,12 @@
 // Created by cyberunner23 on 1/22/18.
 //
 
-#include "TestSquareObject.hpp"
+#include "TestSquare.hpp"
 
-TestSquareObject::TestSquareObject(): IRenderNode()
+TestSquare::TestSquare(): IRenderNode()
 {
+    _debugName = "TestSquare";
+
     _mesh = {
             glm::vec3(0.0f, 0.0f, 0.0f),
             glm::vec3(0.1f, 0.1f, 0.0f),

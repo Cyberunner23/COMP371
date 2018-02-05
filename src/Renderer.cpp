@@ -19,7 +19,6 @@ void Renderer::addRenderObject(std::shared_ptr<IRenderNode> rootNode)
 
 void Renderer::render(glm::mat4 vpMatrix)
 {
-
     for (std::shared_ptr<IRenderNode> root : _objects)
     {
         recursiveRender(vpMatrix, glm::mat4(1.0f), root);
@@ -31,21 +30,19 @@ void Renderer::recursiveRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::shared_pt
 
     if (currentNode == nullptr) return;
 
-
-
-    std::vector<std::shared_ptr<IRenderNode>>* children = currentNode->getChildren();
-    glm::mat4 currentModelMat = currentNode->getModelMatrix() * CTM;
-
-    for (std::shared_ptr<IRenderNode> node : *children)
+    if (!currentNode->getDebugName().empty())
     {
-        recursiveRender(vpMatrix, currentModelMat, node);
+        //std::cout << "Rendering: " << currentNode->getDebugName() << std::endl;
     }
 
-    //render
-    glBindVertexArray(currentNode->getVAO());
-    _shader->useShader();
+    std::vector<std::shared_ptr<IRenderNode>>* children = currentNode->getChildren();
+    glm::mat4 currentModelMat = CTM * currentNode->getModelMatrix();
 
-    glm::mat4 MVP = currentModelMat;
+    //render
+    VAOGuard vGuard(currentNode->getVAO());
+    ShaderGuard sGuard(_shader);
+
+    glm::mat4 MVP = vpMatrix * currentModelMat;
     if (!_shader->setUniformM4fv("MVP", MVP))
     {
         std::cout << "ERROR: failed to set the MVP" << std::endl;
@@ -54,6 +51,24 @@ void Renderer::recursiveRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::shared_pt
     glPolygonMode(GL_FRONT_AND_BACK, _polygonMode);
     glDrawArrays(currentNode->getRenderMode(), 0, (GLsizei)currentNode->getMeshSize());
 
-    _shader->unUseShader();
-    glBindVertexArray(0);
+
+    for (std::shared_ptr<IRenderNode> node : *children)
+    {
+        recursiveRender(vpMatrix, currentModelMat, node);
+    }
+
+    //render
+    /*VAOGuard vGuard(currentNode->getVAO());
+    ShaderGuard sGuard(_shader);
+
+    std::cout << "VAO2 " << currentNode->getVAO() << std::endl;
+
+    glm::mat4 MVP = vpMatrix * currentModelMat;
+    if (!_shader->setUniformM4fv("MVP", MVP))
+    {
+        std::cout << "ERROR: failed to set the MVP" << std::endl;
+    }
+
+    glPolygonMode(GL_FRONT_AND_BACK, _polygonMode);
+    glDrawArrays(currentNode->getRenderMode(), 0, (GLsizei)currentNode->getMeshSize());*/
 }

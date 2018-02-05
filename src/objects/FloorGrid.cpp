@@ -1,11 +1,9 @@
-//
-// Created by cyberunner23 on 1/22/18.
-//
 
-#include "FloorGridObject.hpp"
+#include "FloorGrid.hpp"
 
-FloorGridObject::FloorGridObject(Shader &shader) : IRenderObject(shader)
+FloorGrid::FloorGrid()
 {
+    _debugName = "FloorGrid";
 
     for (int i = -51; i <= 49; i++)
     {
@@ -18,8 +16,7 @@ FloorGridObject::FloorGridObject(Shader &shader) : IRenderObject(shader)
     uploadToGPU();
 }
 
-
-void FloorGridObject::generateSquare(int posX, int posZ)
+void FloorGrid::generateSquare(int posX, int posZ)
 {
 
     std::vector<glm::vec3> color;
