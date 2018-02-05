@@ -18,8 +18,7 @@ public:
 
     glm::vec3 getPos();
     glm::vec3 getRot();
-    
-    void setFOV(float fov);
+
     void onWindowResize(int newWidth, int newHeight);
 
     glm::mat4 getViewProjectionMatrix();

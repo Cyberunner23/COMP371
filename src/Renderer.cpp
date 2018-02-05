@@ -5,7 +5,7 @@ Renderer::Renderer(std::unique_ptr<Shader>&& shader) : _polygonMode(GL_TRIANGLES
 {}
 
 
-inline void Renderer::setPolygonMode(GLenum polygonMode)
+void Renderer::setPolygonMode(GLenum polygonMode)
 {
     _polygonMode = polygonMode;
 }
@@ -30,9 +30,10 @@ void Renderer::recursiveRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::shared_pt
 
     if (currentNode == nullptr) return;
 
-    if (!currentNode->getDebugName().empty())
+    //Some debug output, disabled for now
+    if (!currentNode->getDebugName().empty() && false)
     {
-        //std::cout << "Rendering: " << currentNode->getDebugName() << std::endl;
+        std::cout << "Rendering: " << currentNode->getDebugName() << std::endl;
     }
 
     std::vector<std::shared_ptr<IRenderNode>>* children = currentNode->getChildren();

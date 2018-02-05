@@ -34,6 +34,8 @@ void mousePosCallback(GLFWwindow *window, double xpos, double ypos);
 
 
 std::unique_ptr<Window> window;
+std::unique_ptr<Renderer> renderer;
+std::shared_ptr<Horse> horse;
 std::unique_ptr<Camera> camera;
 //std::unique_ptr<HorseObject> horse;
 
@@ -64,7 +66,8 @@ int main(int argc, char** argv)
     std::shared_ptr<SceneRoot> sceneRoot = std::make_shared<SceneRoot>();
     std::shared_ptr<AxisLines> axis = std::make_shared<AxisLines>();
     std::shared_ptr<FloorGrid> floorGrid = std::make_shared<FloorGrid>();
-    std::shared_ptr<Horse> horse = std::make_shared<Horse>() ;
+    horse = std::make_shared<Horse>();
+    horse->setPosition(glm::vec3(0.35f, 0.52f, 0.5f));
 
 
     floorGrid->setPosition(glm::vec3(0.0f, -0.005f, 0.0f));
@@ -92,6 +95,7 @@ int main(int argc, char** argv)
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        renderer.setPolygonMode(polygonMode);
         renderer.render(vpMatrix);
 
         window->swapBuffers();
@@ -143,30 +147,30 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
                     break;
                 case GLFW_KEY_W:
                 {
-                    //glm::vec3 hPosition = horse->getPosition();
-                    //hPosition = glm::vec3(hPosition.x , hPosition.y, hPosition.z - 1.0f);
-                    //horse->setPosition(hPosition);
+                    glm::vec3 hPosition = horse->getPosition();
+                    hPosition = glm::vec3(hPosition.x , hPosition.y, hPosition.z - 1.0f);
+                    horse->setPosition(std::move(hPosition));
                     break;
                 }
                 case GLFW_KEY_S:
                 {
-                    //glm::vec3 hPosition = horse->getPosition();
-                    //hPosition = glm::vec3(hPosition.x, hPosition.y, hPosition.z + 1.0f);
-                    //horse->setPosition(hPosition);
+                    glm::vec3 hPosition = horse->getPosition();
+                    hPosition = glm::vec3(hPosition.x, hPosition.y, hPosition.z + 1.0f);
+                    horse->setPosition(std::move(hPosition));
                     break;
                 }
                 case GLFW_KEY_D:
                 {
-                    //glm::vec3 hPosition = horse->getPosition();
-                    //hPosition = glm::vec3(hPosition.x + 1.0f, hPosition.y, hPosition.z);
-                    //horse->setPosition(hPosition);
+                    glm::vec3 hPosition = horse->getPosition();
+                    hPosition = glm::vec3(hPosition.x + 1.0f, hPosition.y, hPosition.z);
+                    horse->setPosition(std::move(hPosition));
                     break;
                 }
                 case GLFW_KEY_A:
                 {
-                    //glm::vec3 hPosition = horse->getPosition();
-                    //hPosition = glm::vec3(hPosition.x - 1.0f, hPosition.y, hPosition.z);
-                    //horse->setPosition(hPosition);
+                    glm::vec3 hPosition = horse->getPosition();
+                    hPosition = glm::vec3(hPosition.x - 1.0f, hPosition.y, hPosition.z);
+                    horse->setPosition(std::move(hPosition));
                     break;
                 }
                 default:
@@ -182,30 +186,30 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
             {
                 case GLFW_KEY_W:
                 {
-                    //glm::vec3 hRotation = horse->getRotation();
-                    //hRotation = glm::vec3(hRotation.x, hRotation.y, hRotation.z - 5.0f);
-                    //horse->setRotation(hRotation);
+                    glm::vec3 hRotation = horse->getRotation();
+                    hRotation = glm::vec3(hRotation.x, hRotation.y, hRotation.z - 5.0f);
+                    horse->setRotation(std::move(hRotation));
                     break;
                 }
                 case GLFW_KEY_S:
                 {
-                    //glm::vec3 hRotation = horse->getRotation();
-                    //hRotation = glm::vec3(hRotation.x, hRotation.y, hRotation.z + 5.0f);
-                    //horse->setRotation(hRotation);
+                    glm::vec3 hRotation = horse->getRotation();
+                    hRotation = glm::vec3(hRotation.x, hRotation.y, hRotation.z + 5.0f);
+                    horse->setRotation(std::move(hRotation));
                     break;
                 }
                 case GLFW_KEY_D:
                 {
-                    //glm::vec3 hRotation = horse->getRotation();
-                    //hRotation = glm::vec3(hRotation.x, hRotation.y - 5.0f, hRotation.z);
-                    //horse->setRotation(hRotation);
+                    glm::vec3 hRotation = horse->getRotation();
+                    hRotation = glm::vec3(hRotation.x, hRotation.y - 5.0f, hRotation.z);
+                    horse->setRotation(std::move(hRotation));
                     break;
                 }
                 case GLFW_KEY_A:
                 {
-                    //glm::vec3 hRotation = horse->getRotation();
-                    //hRotation = glm::vec3(hRotation.x, hRotation.y + 5.0f, hRotation.z);
-                    //horse->setRotation(hRotation);
+                    glm::vec3 hRotation = horse->getRotation();
+                    hRotation = glm::vec3(hRotation.x, hRotation.y + 5.0f, hRotation.z);
+                    horse->setRotation(std::move(hRotation));
                     break;
                 }
                 case GLFW_KEY_Q:
@@ -216,26 +220,26 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
                     break;
                 case GLFW_KEY_SPACE:
                 {
-                    //glm::vec3 currentPos = horse->getPosition();
-                    //int min = -51;
-                    //int max = 49;
-                    //int x = min + (rand() % (max - min + 1));
-                    //int z = min + (rand() % (max - min + 1));
-                    //horse->setPosition(glm::vec3(x, currentPos.y, z));
-                    //break;
+                    glm::vec3 currentPos = horse->getPosition();
+                    int min = -51;
+                    int max = 49;
+                    int x = min + (rand() % (max - min + 1));
+                    int z = min + (rand() % (max - min + 1));
+                    horse->setPosition(glm::vec3(x, currentPos.y, z));
+                    break;
                 }
                 case GLFW_KEY_U:
                 {
-                    //glm::vec3 scale = horse->getScale();
-                    //scale += 0.05f;
-                    //horse->setScale(scale);
+                    glm::vec3 scale = horse->getScale();
+                    scale += 0.05f;
+                    horse->setScale(std::move(scale));
                     break;
                 }
                 case GLFW_KEY_J:
                 {
-                    //glm::vec3 scale = horse->getScale();
-                    //scale -= 0.05f;
-                    //horse->setScale(scale);
+                    glm::vec3 scale = horse->getScale();
+                    scale -= 0.05f;
+                    horse->setScale(std::move(scale));
                     break;
                 }
                 default:

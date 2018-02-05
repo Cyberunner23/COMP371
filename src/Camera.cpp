@@ -33,12 +33,6 @@ glm::vec3 Camera::getRot()
 }
 
 
-void Camera::setFOV(float fov)
-{
-    _fov = fov;
-    _vpMatrix = computeViewProjectionMatrix();
-}
-
 void Camera::onWindowResize(int newWidth, int newHeight)
 {
     _windowSize = glm::vec2(newWidth, newHeight);
@@ -54,16 +48,8 @@ glm::mat4 Camera::getViewProjectionMatrix()
 
 glm::mat4 Camera::computeViewProjectionMatrix()
 {
-
-    glm::mat4 rotX = glm::rotate(glm::mat4(1.0f), glm::radians(_camRot.x), glm::vec3(1.0f, 0.0f, 0.0f));
-    glm::mat4 rotY = glm::rotate(glm::mat4(1.0f), glm::radians(_camRot.y), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 rotZ = glm::rotate(glm::mat4(1.0f), glm::radians(_camRot.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-    glm::mat4 rotation = rotZ * rotY * rotX;
-    glm::mat4 translation = glm::translate(glm::mat4(1.0f), -_camPos);
-
+    glm::mat4 lookAt = glm::lookAt(_camPos, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     glm::mat4 projectionMat = glm::perspective(glm::radians(_fov), _windowSize.x / _windowSize.y, 0.1f, 100.0f);
-    glm::mat4 viewMat = rotation * translation;
 
-    return projectionMat * viewMat;
+    return projectionMat * lookAt;
 }
