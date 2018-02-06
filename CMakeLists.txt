@@ -25,8 +25,8 @@ endif()
 include("cmake/HunterGate.cmake")
 
 HunterGate(
-    URL "https://github.com/ruslo/hunter/archive/v0.19.232.tar.gz"
-    SHA1 "a412c45fe4c5a72fed386f62dd8d753bd4fd3d11"
+    URL "https://github.com/ruslo/hunter/archive/v0.19.245.tar.gz"
+    SHA1 "34c8f443ef188adc5b3f0106ec5b06999164e1c8"
 )
 
 project(COMP371)
@@ -37,14 +37,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED true)
 
 
 #Hunter Packages
-hunter_add_package(glew)
-find_package(glew CONFIG REQUIRED)
+find_package(glew REQUIRED)
 
 hunter_add_package(glfw)
-find_package(glfw3 CONFIG REQUIRED)
+find_package(glfw3 REQUIRED)
 
-hunter_add_package(glm)
-find_package(glm CONFIG REQUIRED)
+find_package(glm REQUIRED)
 
 
 #------------------------------------------------------------------------------

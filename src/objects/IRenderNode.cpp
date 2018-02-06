@@ -98,14 +98,6 @@ glm::mat4 IRenderNode::computeModelMatrix()
     glm::mat4 scale = glm::scale(glm::mat4(1.0f), _scale);
 
     return  translate * scale * rotate;
-
-    /*glm::mat4 matrix = glm::scale(glm::mat4(1.0f), _scale);
-    matrix = glm::translate(matrix, _position);
-    matrix = glm::rotate(matrix, glm::radians(_rotation.x), glm::vec3(1.0f, 0.0f, 0.0f));
-    matrix = glm::rotate(matrix, glm::radians(_rotation.y), glm::vec3(0.0f, 1.0f, 0.0f));
-    matrix = glm::rotate(matrix, glm::radians(_rotation.z), glm::vec3(0.0f, 0.0f, 1.0f));
-
-    return matrix;*/
 }
 
 

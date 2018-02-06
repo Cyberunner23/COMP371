@@ -10,7 +10,6 @@
 #include "Renderer.hpp"
 #include "Window.hpp"
 #include "objects/AxisLines.hpp"
-#include "objects/Cube.hpp"
 #include "objects/Horse.hpp"
 #include "objects/SceneRoot.hpp"
 #include "objects/FloorGrid.hpp"
@@ -31,39 +30,58 @@ const int InitWindowHeight = 800;
 void windowSizeCallback(GLFWwindow *window, int width, int height);
 void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
 void mousePosCallback(GLFWwindow *window, double xpos, double ypos);
+void mouseBtnCallback(GLFWwindow *window, int key, int action, int mods);
 
 
-std::unique_ptr<Window> window;
+std::unique_ptr<Window> mainWindow;
 std::unique_ptr<Renderer> renderer;
+std::shared_ptr<SceneRoot> sceneRoot;
 std::shared_ptr<Horse> horse;
 std::unique_ptr<Camera> camera;
 //std::unique_ptr<HorseObject> horse;
 
 GLenum polygonMode = GL_FILL;
 
+
+bool isLMouseButtonPressed;
+bool isLMousePosRegistered;
+glm::vec2 initLMousePos;
+
+bool isRMouseButtonPressed;
+bool isRMousePosRegistered;
+glm::vec2 initRMousePos;
+
+bool isMMouseButtonPressed;
+bool isMMousePosRegistered;
+glm::vec2 initMMousePos;
+
+
+
 const float  camSpeedFactor   = 0.05;
 const float  mouseSensitivity = 1.0;
-double mxPos;
-double myPos;
 
 int main(int argc, char** argv)
 {
 
-    window = std::make_unique<Window>(InitWindowWidth, InitWindowHeight, "COMP371 Project by Alex Frappier Lachapelle (40019133)");
+    //Create window and camera
+    mainWindow = std::make_unique<Window>(InitWindowWidth, InitWindowHeight, "COMP371 Project by Alex Frappier Lachapelle (40019133)");
     camera = std::make_unique<Camera>(InitWindowWidth, InitWindowHeight, 45.0f);
 
-    window->setWindowSizeCallback(windowSizeCallback);
-    window->setKeyCallback(keyCallback);
-    //window->setMousePosCallback(mousePosCallback);
+    //Set callbacks
+    mainWindow->setWindowSizeCallback(windowSizeCallback);
+    mainWindow->setKeyCallback(keyCallback);
+    mainWindow->setMouseBtnCallback(mouseBtnCallback);
+    mainWindow->setMousePosCallback(mousePosCallback);
 
     //Create the camera and projection
     camera->setPos(glm::vec3(0.55f, 0.55f, 5.0f));
 
-    //Load the shader
+    //Load the shader and create renderer
     std::unique_ptr<Shader> genericShader = std::make_unique<Shader>("generic");
-    Renderer renderer(std::move(genericShader));
+    renderer = std::make_unique<Renderer>(std::move(genericShader));
 
-    std::shared_ptr<SceneRoot> sceneRoot = std::make_shared<SceneRoot>();
+    //Create Scene objects
+    sceneRoot = std::make_shared<SceneRoot>();
     std::shared_ptr<AxisLines> axis = std::make_shared<AxisLines>();
     std::shared_ptr<FloorGrid> floorGrid = std::make_shared<FloorGrid>();
     horse = std::make_shared<Horse>();
@@ -71,34 +89,30 @@ int main(int argc, char** argv)
 
 
     floorGrid->setPosition(glm::vec3(0.0f, -0.005f, 0.0f));
-    sceneRoot->setPosition(glm::vec3(0.0f, 0.0f, 0.0f));
-    sceneRoot->setRotation(glm::vec3(0.0f, 0.0f, 0.0f));
 
+    //Add objects to scene root
+    sceneRoot->addChildNode(axis);
     sceneRoot->addChildNode(floorGrid);
     sceneRoot->addChildNode(horse);
 
-    //renderer.addRenderObject(square);
-    //renderer.addRenderObject(floorGrid);
-    //renderer.addRenderObject(axis);
-    renderer.addRenderObject(axis);
-    renderer.addRenderObject(sceneRoot);
+    //Add scene root to world
+    renderer->addRenderObject(sceneRoot);
 
 
 
     //Render loop
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    while (!window->shouldClose())
+    while (!mainWindow->shouldClose())
     {
-        window->pollEvents();
+        mainWindow->pollEvents();
 
         glm::mat4 vpMatrix = camera->getViewProjectionMatrix();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        renderer.setPolygonMode(polygonMode);
-        renderer.render(vpMatrix);
+        renderer->render(vpMatrix);
 
-        window->swapBuffers();
+        mainWindow->swapBuffers();
         glfwPollEvents();
     }
 
@@ -108,7 +122,7 @@ int main(int argc, char** argv)
 
 void windowSizeCallback(GLFWwindow *glfwWindow, int width, int height)
 {
-    window->onWindowResize(width, height);
+    mainWindow->onWindowResize(width, height);
     camera->onWindowResize(width, height);
 }
 
@@ -137,13 +151,13 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
             switch (key)
             {
                 case GLFW_KEY_P:
-                    polygonMode = GL_POINT;
+                    renderer->setPolygonMode(GL_POINT);
                     break;
                 case GLFW_KEY_L:
-                    polygonMode = GL_LINE;
+                    renderer->setPolygonMode(GL_LINE);
                     break;
                 case GLFW_KEY_T:
-                    polygonMode = GL_FILL;
+                    renderer->setPolygonMode(GL_FILL);
                     break;
                 case GLFW_KEY_W:
                 {
@@ -242,6 +256,36 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
                     horse->setScale(std::move(scale));
                     break;
                 }
+                case GLFW_KEY_RIGHT:
+                {
+                    glm::vec3 currentRotation = sceneRoot->getRotation();
+                    sceneRoot->setRotation(glm::vec3(currentRotation.x, currentRotation.y + 5, currentRotation.z));
+                    break;
+                }
+                case GLFW_KEY_LEFT:
+                {
+                    glm::vec3 currentRotation = sceneRoot->getRotation();
+                    sceneRoot->setRotation(glm::vec3(currentRotation.x, currentRotation.y - 5, currentRotation.z));
+                    break;
+                }
+                case GLFW_KEY_UP:
+                {
+                    glm::vec3 currentRotation = sceneRoot->getRotation();
+                    sceneRoot->setRotation(glm::vec3(currentRotation.x + 5, currentRotation.y, currentRotation.z));
+                    break;
+                }
+                case GLFW_KEY_DOWN:
+                {
+                    glm::vec3 currentRotation = sceneRoot->getRotation();
+                    sceneRoot->setRotation(glm::vec3(currentRotation.x - 5, currentRotation.y, currentRotation.z));
+                    break;
+                }
+                case GLFW_KEY_HOME:
+                {
+                    sceneRoot->setScale(glm::vec3(1.0f));
+                    sceneRoot->setPosition(glm::vec3(0.0f));
+                    sceneRoot->setRotation(glm::vec3(0.0f));
+                }
                 default:
                     break;
             }
@@ -251,24 +295,100 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
     }
 }
 
+void mouseBtnCallback(GLFWwindow *window, int key, int action, int mods)
+{
+    if(key == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+    {
+        isLMouseButtonPressed = true;
+    }
+
+    if(key == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
+    {
+        isLMouseButtonPressed = false;
+        isLMousePosRegistered = false;
+    }
+
+
+    if(key == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS)
+    {
+        isRMouseButtonPressed = true;
+    }
+
+    if(key == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
+    {
+        isRMouseButtonPressed = false;
+        isRMousePosRegistered = false;
+    }
+
+
+    if(key == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_PRESS)
+    {
+        isMMouseButtonPressed = true;
+    }
+
+    if(key == GLFW_MOUSE_BUTTON_MIDDLE && action == GLFW_RELEASE)
+    {
+        isMMouseButtonPressed = false;
+        isMMousePosRegistered = false;
+    }
+
+}
+
 void mousePosCallback(GLFWwindow *window, double xpos, double ypos)
 {
 
-    glm::vec3 rotation = camera->getRot();
-
-    rotation.y += mouseSensitivity * (xpos - mxPos);
-    rotation.x += mouseSensitivity * (ypos - myPos);
-
-    if (rotation.x > 90.0f) {
-        rotation.x = 90.0f;
-    }
-    if (rotation.x < -90.0f) {
-        rotation.x = -90.0f;
+    if (!isLMousePosRegistered && isLMouseButtonPressed)
+    {
+        initLMousePos = glm::vec2((float) xpos, (float) ypos);
+        isLMousePosRegistered = true;
+        return;
     }
 
-    camera->setRot(rotation);
+    if (isLMouseButtonPressed)
+    {
+        float scaleFactor = 0.00001;
+        glm::vec3 currentScale = sceneRoot->getScale();
 
-    mxPos = xpos;
-    myPos = ypos;
-    std::cout << mxPos << ":" << myPos << " " << rotation.x << ":" << rotation.y << std::endl;
+        float newScale = currentScale.y + ((float) (initLMousePos.y - ypos) * scaleFactor);
+
+        if (newScale <= 0.00001f)
+        {
+            return;
+        }
+
+        sceneRoot->setScale(glm::vec3(newScale));
+    }
+
+
+    if (!isRMousePosRegistered && isRMouseButtonPressed)
+    {
+        initRMousePos = glm::vec2((float) xpos, (float) ypos);
+        isRMousePosRegistered = true;
+        return;
+    }
+
+    if (isRMouseButtonPressed)
+    {
+        float translateFactor = 0.00001f;
+        glm::vec3 currentPosition = sceneRoot->getPosition();
+        std::cout << initRMousePos.x - xpos << std::endl;
+        float newPos = currentPosition.x + ((float) (initRMousePos.x - xpos) * translateFactor);
+        sceneRoot->setPosition(glm::vec3(newPos, currentPosition.y, currentPosition.z));
+    }
+
+
+    if (!isMMousePosRegistered && isMMouseButtonPressed)
+    {
+        initMMousePos = glm::vec2((float) xpos, (float) ypos);
+        isMMousePosRegistered = true;
+        return;
+    }
+
+    if (isMMouseButtonPressed)
+    {
+        float rotateFactor = 0.01f;
+        glm::vec3 currentRotation = sceneRoot->getRotation();
+        float newRot = currentRotation.x + ((float) (initMMousePos.y - ypos) * rotateFactor);
+        sceneRoot->setRotation(glm::vec3(newRot, currentRotation.y, currentRotation.z));
+    }
 }

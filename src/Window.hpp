@@ -24,6 +24,7 @@ public:
     void setWindowSizeCallback(GLFWwindowsizefun windowSizeCallback);
     void setKeyCallback(GLFWkeyfun keyCallback);
     void setMousePosCallback(GLFWcursorposfun mousePosCallback);
+    void setMouseBtnCallback(GLFWmousebuttonfun mouseBtnCallback);
 
 private:
 
