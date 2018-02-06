@@ -37,11 +37,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED true)
 
 
 #Hunter Packages
+hunter_add_package(glew)
 find_package(glew REQUIRED)
 
 hunter_add_package(glfw)
 find_package(glfw3 REQUIRED)
 
+hunter_add_package(glm)
 find_package(glm REQUIRED)
 
 
@@ -72,9 +74,6 @@ set(SRCS
     src/objects/IRenderNode.cpp
     src/objects/TestSquare.hpp
     src/objects/TestSquare.cpp
-#
-    #src/objects/TestTriangleObject.hpp
-    #src/objects/TestTriangleObject.cpp
     src/objects/SceneRoot.hpp src/objects/FloorGrid.cpp src/objects/FloorGrid.hpp src/objects/AxisLines.cpp src/objects/AxisLines.hpp src/objects/Horse.cpp src/objects/Horse.hpp src/objects/Cube.cpp src/objects/Cube.hpp)
 
 
