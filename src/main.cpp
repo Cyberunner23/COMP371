@@ -237,8 +237,8 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
                     glm::vec3 currentPos = horse->getPosition();
                     int min = -51;
                     int max = 49;
-                    int x = min + (rand() % (max - min + 1));
-                    int z = min + (rand() % (max - min + 1));
+                    float x = min + (rand() % (max - min + 1)) + .35f;
+                    float z = min + (rand() % (max - min + 1)) + 0.52f;
                     horse->setPosition(glm::vec3(x, currentPos.y, z));
                     break;
                 }
@@ -371,7 +371,6 @@ void mousePosCallback(GLFWwindow *window, double xpos, double ypos)
     {
         float translateFactor = 0.00001f;
         glm::vec3 currentPosition = sceneRoot->getPosition();
-        std::cout << initRMousePos.x - xpos << std::endl;
         float newPos = currentPosition.x + ((float) (initRMousePos.x - xpos) * translateFactor);
         sceneRoot->setPosition(glm::vec3(newPos, currentPosition.y, currentPosition.z));
     }
