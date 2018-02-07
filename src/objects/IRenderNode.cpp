@@ -20,7 +20,7 @@ IRenderNode::IRenderNode(std::string name) : IRenderNode()
 
 void IRenderNode::addChildNode(std::shared_ptr<IRenderNode> node)
 {
-    std::cout << _debugName << " -> " << node->_debugName << std::endl;
+    //std::cout << _debugName << " -> " << node->_debugName << std::endl;
     _childNodes.push_back(node);
 }
 

@@ -57,7 +57,7 @@ private:
         fileSize = file.tellg();
         file.seekg(0, std::ios::beg);
 
-        if (fileSize == 0)
+        if (fileSize == (std::streampos)0)
         {
             file.close();
             return "Shader file is empty, most definitely is invalid.";

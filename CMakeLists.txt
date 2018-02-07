@@ -38,13 +38,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED true)
 
 #Hunter Packages
 hunter_add_package(glew)
-find_package(glew REQUIRED)
+find_package(glew CONFIG REQUIRED)
 
 hunter_add_package(glfw)
-find_package(glfw3 REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
 
 hunter_add_package(glm)
-find_package(glm REQUIRED)
+find_package(glm CONFIG REQUIRED)
 
 
 #------------------------------------------------------------------------------
