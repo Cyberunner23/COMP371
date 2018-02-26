@@ -1,26 +1,27 @@
 
 #include "IRenderNode.hpp"
 
-IRenderNode::IRenderNode() : _position(0.0f, 0.0f, 0.0f),
-                             _scale(1.0f, 1.0f, 1.0f),
-                             _rotation(0.0f, 0.0f, 0.0f),
-                             _modelMatrix(computeModelMatrix()),
-                             _debugName("")
+IRenderNode::IRenderNode()
+        : _position(0.0f, 0.0f, 0.0f)
+        , _scale(1.0f, 1.0f, 1.0f)
+        , _rotation(0.0f, 0.0f, 0.0f)
+        , _modelMatrix(computeModelMatrix())
+        , _debugName("")
 {
     glGenVertexArrays(1, &_VAO);
     glGenBuffers(1, &_VBO);
     glGenBuffers(1, &_CBO);
+    glGenBuffers(1, &_UVBO);
 }
 
 IRenderNode::IRenderNode(std::string name) : IRenderNode()
 {
-    _debugName = name;
+    _debugName = std::move(name);
 }
 
 
-void IRenderNode::addChildNode(std::shared_ptr<IRenderNode> node)
+void IRenderNode::addChildNode(const std::shared_ptr<IRenderNode>& node)
 {
-    //std::cout << _debugName << " -> " << node->_debugName << std::endl;
     _childNodes.push_back(node);
 }
 
@@ -34,9 +35,15 @@ glm::vec3 IRenderNode::getPosition()
     return _position;
 }
 
-void IRenderNode::setPosition(glm::vec3&& pos)
+void IRenderNode::setPosition(const glm::vec3&& pos)
 {
-    _position = std::move(pos);
+    _position = pos;
+    _modelMatrix = computeModelMatrix();
+}
+
+void IRenderNode::translate(const glm::vec3& translation)
+{
+    _position += translation;
     _modelMatrix = computeModelMatrix();
 }
 
@@ -46,9 +53,15 @@ glm::vec3 IRenderNode::getScale()
     return _scale;
 }
 
-void IRenderNode::setScale(glm::vec3&& scale)
+void IRenderNode::setScale(const glm::vec3&& scale)
 {
-    _scale = std::move(scale);
+    _scale = scale;
+    _modelMatrix = computeModelMatrix();
+}
+
+void IRenderNode::scale(const glm::vec3& scaling)
+{
+    _scale += scaling;
     _modelMatrix = computeModelMatrix();
 }
 
@@ -58,9 +71,15 @@ glm::vec3 IRenderNode::getRotation()
     return _rotation;
 }
 
-void IRenderNode::setRotation(glm::vec3&& rotation)
+void IRenderNode::setRotation(const glm::vec3&& rotation)
 {
-    _rotation = std::move(rotation);
+    _rotation = rotation;
+    _modelMatrix = computeModelMatrix();
+}
+
+void IRenderNode::rotate(const glm::vec3& rotation)
+{
+    _rotation += rotation;
     _modelMatrix = computeModelMatrix();
 }
 
@@ -68,6 +87,16 @@ void IRenderNode::setRotation(glm::vec3&& rotation)
 GLuint IRenderNode::getVAO()
 {
     return _VAO;
+}
+
+bool IRenderNode::hasTexture()
+{
+    return _texture.get() != nullptr;
+}
+
+GLuint IRenderNode::getTexture()
+{
+    return *_texture;
 }
 
 GLenum IRenderNode::getRenderMode()
@@ -103,7 +132,7 @@ glm::mat4 IRenderNode::computeModelMatrix()
 
 void IRenderNode::uploadToGPU()
 {
-    glBindVertexArray(_VAO);
+    VAOGuard guard(_VAO);
 
     //Vertices
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
@@ -111,11 +140,24 @@ void IRenderNode::uploadToGPU()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
-    //Line Colors
-    glBindBuffer(GL_ARRAY_BUFFER, _CBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*_colors.size(), &_colors[0], GL_STATIC_DRAW);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    glEnableVertexAttribArray(1);
+    if (!hasTexture())
+    {
+        //Line Colors
+        glBindBuffer(GL_ARRAY_BUFFER, _CBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*_colors.size(), &_colors[0], GL_STATIC_DRAW);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glEnableVertexAttribArray(1);
+    }
+    else
+    {
+        //UVs
+        glBindBuffer(GL_ARRAY_BUFFER, _UVBO);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*_uvs.size(), &_uvs[0], GL_STATIC_DRAW);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+        glEnableVertexAttribArray(1);
+    }
 
-    glBindVertexArray(0);
+
+
+
 }

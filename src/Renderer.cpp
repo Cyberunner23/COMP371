@@ -1,7 +1,10 @@
 
 #include "Renderer.hpp"
 
-Renderer::Renderer(std::unique_ptr<Shader>&& shader) : _polygonMode(GL_TRIANGLES), _shader(std::move(shader))
+Renderer::Renderer(std::unique_ptr<Shader>&& genericShader, std::unique_ptr<Shader>&& textureShader)
+        : _polygonMode(GL_TRIANGLES)
+        , _genericShader(std::move(genericShader))
+        , _textureShader(std::move(textureShader))
 {}
 
 
@@ -37,10 +40,21 @@ void Renderer::recursiveRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::shared_pt
 
     //render
     VAOGuard vGuard(currentNode->getVAO());
-    ShaderGuard sGuard(_shader);
+    std::unique_ptr<ShaderGuard> sGuard;
+    std::unique_ptr<TextureGuard> tGuard;
+    if (!currentNode->hasTexture())
+    {
+        sGuard = std::make_unique<ShaderGuard>(_genericShader);
+    }
+    else
+    {
+        sGuard = std::make_unique<ShaderGuard>(_textureShader);
+        tGuard = std::make_unique<TextureGuard>(currentNode->getTexture());
+    }
+
 
     glm::mat4 MVP = vpMatrix * currentModelMat;
-    if (!_shader->setUniformM4fv("MVP", MVP))
+    if (!_genericShader->setUniformM4fv("MVP", MVP))
     {
         std::cout << "ERROR: failed to set the MVP" << std::endl;
     }

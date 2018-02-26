@@ -13,6 +13,7 @@
 #include "objects/Horse.hpp"
 #include "objects/SceneRoot.hpp"
 #include "objects/FloorGrid.hpp"
+#include "objects/TestSquare.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -38,9 +39,6 @@ std::unique_ptr<Renderer> renderer;
 std::shared_ptr<SceneRoot> sceneRoot;
 std::shared_ptr<Horse> horse;
 std::unique_ptr<Camera> camera;
-//std::unique_ptr<HorseObject> horse;
-
-GLenum polygonMode = GL_FILL;
 
 
 bool isLMouseButtonPressed;
@@ -78,7 +76,8 @@ int main(int argc, char** argv)
 
     //Load the shader and create renderer
     std::unique_ptr<Shader> genericShader = std::make_unique<Shader>("generic");
-    renderer = std::make_unique<Renderer>(std::move(genericShader));
+    std::unique_ptr<Shader> textureShader = std::make_unique<Shader>("texture");
+    renderer = std::make_unique<Renderer>(std::move(genericShader), std::move(textureShader));
 
     //Create Scene objects
     sceneRoot = std::make_shared<SceneRoot>();
@@ -87,6 +86,8 @@ int main(int argc, char** argv)
     horse = std::make_shared<Horse>();
     horse->setPosition(glm::vec3(0.35f, 0.52f, 0.5f));
 
+    horse->showAxis(true);
+
 
     floorGrid->setPosition(glm::vec3(0.0f, -0.005f, 0.0f));
 
@@ -94,6 +95,9 @@ int main(int argc, char** argv)
     sceneRoot->addChildNode(axis);
     sceneRoot->addChildNode(floorGrid);
     sceneRoot->addChildNode(horse);
+
+    std::shared_ptr<TestSquare> square = std::make_shared<TestSquare>(10);
+    sceneRoot->addChildNode(square);
 
     //Add scene root to world
     renderer->addRenderObject(sceneRoot);
@@ -141,6 +145,12 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
                     case GLFW_KEY_Q:
                         glfwSetWindowShouldClose(window, GLFW_TRUE);
                         break;
+                    case GLFW_KEY_D:
+                    {
+                        static bool showAxis = false;
+                        showAxis = !showAxis;
+                        horse->showAxis(showAxis);
+                    }
                     default:
                         break;
                 }
@@ -185,6 +195,56 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
                     glm::vec3 hPosition = horse->getPosition();
                     hPosition = glm::vec3(hPosition.x - 1.0f, hPosition.y, hPosition.z);
                     horse->setPosition(std::move(hPosition));
+                    break;
+                }
+                case GLFW_KEY_0:
+                {
+                    horse->blLegBot->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    break;
+                }
+                case GLFW_KEY_1:
+                {
+                    horse->head->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    break;
+                }
+                case GLFW_KEY_2:
+                {
+                    horse->neck->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    break;
+                }
+                case GLFW_KEY_3:
+                {
+                    horse->frLegTop->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    break;
+                }
+                case GLFW_KEY_4:
+                {
+                    horse->frLegBot->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    break;
+                }
+                case GLFW_KEY_5:
+                {
+                    horse->brLegTop->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    break;
+                }
+                case GLFW_KEY_6:
+                {
+                    horse->brLegBot->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    break;
+                }
+                case GLFW_KEY_7:
+                {
+                    horse->flLegTop->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    break;
+                }
+                case GLFW_KEY_8:
+                {
+                    horse->flLegBot->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    break;
+                }
+                case GLFW_KEY_9:
+                {
+                    horse->blLegTop->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
                     break;
                 }
                 default:
@@ -285,6 +345,57 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
                     sceneRoot->setScale(glm::vec3(1.0f));
                     sceneRoot->setPosition(glm::vec3(0.0f));
                     sceneRoot->setRotation(glm::vec3(0.0f));
+                    break;
+                }
+                case GLFW_KEY_0:
+                {
+                    horse->blLegBot->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    break;
+                }
+                case GLFW_KEY_1:
+                {
+                    horse->head->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    break;
+                }
+                case GLFW_KEY_2:
+                {
+                    horse->neck->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    break;
+                }
+                case GLFW_KEY_3:
+                {
+                    horse->frLegTop->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    break;
+                }
+                case GLFW_KEY_4:
+                {
+                    horse->frLegBot->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    break;
+                }
+                case GLFW_KEY_5:
+                {
+                    horse->brLegTop->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    break;
+                }
+                case GLFW_KEY_6:
+                {
+                    horse->brLegBot->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    break;
+                }
+                case GLFW_KEY_7:
+                {
+                    horse->flLegTop->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    break;
+                }
+                case GLFW_KEY_8:
+                {
+                    horse->flLegBot->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    break;
+                }
+                case GLFW_KEY_9:
+                {
+                    horse->blLegTop->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    break;
                 }
                 default:
                     break;

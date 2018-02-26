@@ -8,9 +8,10 @@
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
 
+#include "VAOGuard.hpp"
 #include "Shader.hpp"
 #include "ShaderGuard.hpp"
-#include "VAOGuard.hpp"
+#include "TextureGuard.hpp"
 #include "objects/IRenderNode.hpp"
 
 /*
@@ -23,7 +24,7 @@ class Renderer
 
 public:
 
-    explicit Renderer(std::unique_ptr<Shader>&& shader);
+    explicit Renderer(std::unique_ptr<Shader>&& genericShader, std::unique_ptr<Shader>&& textureShader);
 
     void setPolygonMode(GLenum polygonMode);
     void addRenderObject(std::shared_ptr<IRenderNode> rootNode);
@@ -32,7 +33,8 @@ public:
 
 private:
 
-    std::unique_ptr<Shader> _shader;
+    std::unique_ptr<Shader> _genericShader;
+    std::unique_ptr<Shader> _textureShader;
     GLenum _polygonMode;
 
     std::vector<std::shared_ptr<IRenderNode>> _objects;

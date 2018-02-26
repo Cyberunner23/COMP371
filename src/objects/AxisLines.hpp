@@ -6,5 +6,6 @@
 class AxisLines : public IRenderNode
 {
 public:
-    AxisLines();
+    AxisLines() : AxisLines(5) {}
+    AxisLines(float size);
 };

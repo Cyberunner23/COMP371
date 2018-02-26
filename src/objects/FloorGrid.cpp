@@ -13,6 +13,8 @@ FloorGrid::FloorGrid()
         }
     }
 
+    _texture = std::make_unique<GLuint>(png_texture_load("data/grass.png", nullptr, nullptr));
+
     uploadToGPU();
 }
 
@@ -42,5 +44,7 @@ void FloorGrid::generateSquare(int posX, int posZ)
         glm::vec3 translated = glm::vec3(squareXZ[i].x + posX, squareXZ[i].y , squareXZ[i].z + posZ);
         _mesh.push_back(translated);
     }
+
+    _uvs.insert(_uvs.end(), squareUV.begin(), squareUV.end());
 
 }

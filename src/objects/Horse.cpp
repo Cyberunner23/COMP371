@@ -1,35 +1,32 @@
-//
-// Created by cyberunner23 on 2/4/18.
-//
 
 #include "Horse.hpp"
 
 Horse::Horse() : IRenderNode("Horse")
 {
 
-    std::shared_ptr<HorseTorso> frontTorso = std::make_shared<HorseTorso>(glm::vec3(0.0f), "FrontTorso");
-    std::shared_ptr<HorseTorso> backTorso = std::make_shared<HorseTorso>(glm::vec3(0.1f), "BackTorso");
+    frontTorso = std::make_shared<HorseTorso>(glm::vec3(0.0f), "FrontTorso");
+    backTorso = std::make_shared<HorseTorso>(glm::vec3(0.1f), "BackTorso");
 
-    std::shared_ptr<HorseTail> tail = std::make_shared<HorseTail>("Tail");
+    tail = std::make_shared<HorseTail>("Tail");
 
-    std::shared_ptr<HorseNeck> neck = std::make_shared<HorseNeck>();
-    std::shared_ptr<HorseHead> head = std::make_shared<HorseHead>();
+    neck = std::make_shared<HorseNeck>();
+    head = std::make_shared<HorseHead>();
 
-    std::shared_ptr<HorseLegTop>  frLegTop  = std::make_shared<HorseLegTop>("frLegTop");
-    std::shared_ptr<HorseLegBot>  frLegBot  = std::make_shared<HorseLegBot>("frLegBot");
-    std::shared_ptr<HorseLegHoof> frLegHoof = std::make_unique<HorseLegHoof>("frLegHoof");
+    frLegTop  = std::make_shared<HorseLegTop>("frLegTop");
+    frLegBot  = std::make_shared<HorseLegBot>("frLegBot");
+    frLegHoof = std::make_unique<HorseLegHoof>("frLegHoof");
 
-    std::shared_ptr<HorseLegTop>  flLegTop  = std::make_shared<HorseLegTop>("flLegTop");
-    std::shared_ptr<HorseLegBot>  flLegBot  = std::make_shared<HorseLegBot>("flLegBot");
-    std::shared_ptr<HorseLegHoof> flLegHoof = std::make_unique<HorseLegHoof>("flLegHoof");
+    flLegTop  = std::make_shared<HorseLegTop>("flLegTop");
+    flLegBot  = std::make_shared<HorseLegBot>("flLegBot");
+    flLegHoof = std::make_unique<HorseLegHoof>("flLegHoof");
 
-    std::shared_ptr<HorseLegTop>  brLegTop  = std::make_shared<HorseLegTop>("brLegTop");
-    std::shared_ptr<HorseLegBot>  brLegBot  = std::make_shared<HorseLegBot>("brLegBot");
-    std::shared_ptr<HorseLegHoof> brLegHoof = std::make_unique<HorseLegHoof>("brLegHoof");
+    brLegTop  = std::make_shared<HorseLegTop>("brLegTop");
+    brLegBot  = std::make_shared<HorseLegBot>("brLegBot");
+    brLegHoof = std::make_unique<HorseLegHoof>("brLegHoof");
 
-    std::shared_ptr<HorseLegTop>  blLegTop  = std::make_shared<HorseLegTop>("blLegTop");
-    std::shared_ptr<HorseLegBot>  blLegBot  = std::make_shared<HorseLegBot>("blLegBot");
-    std::shared_ptr<HorseLegHoof> blLegHoof = std::make_unique<HorseLegHoof>("blLegHoof");
+    blLegTop  = std::make_shared<HorseLegTop>("blLegTop");
+    blLegBot  = std::make_shared<HorseLegBot>("blLegBot");
+    blLegHoof = std::make_unique<HorseLegHoof>("blLegHoof");
 
 
     backTorso->setRotation(glm::vec3(0.0f, 0.0f, -90.0f));
@@ -61,23 +58,23 @@ Horse::Horse() : IRenderNode("Horse")
 
 
     //Back left leg
-    brLegTop->setRotation(glm::vec3(0.0f, 0.0f, -90.0f));
-    brLegTop->setPosition(glm::vec3(0.05f, 0.2025f, 0.0525f));
-    brLegBot->setPosition(glm::vec3(0.0f, 0.2f, 0.0f));
-    brLegHoof->setPosition(glm::vec3(0.0f, 0.2f, 0.0f));
-
-    brLegTop->addChildNode(brLegBot);
-    brLegBot->addChildNode(brLegHoof);
-
-
-    //Back right leg
     blLegTop->setRotation(glm::vec3(0.0f, 0.0f, -90.0f));
-    blLegTop->setPosition(glm::vec3(0.05f, 0.2025f, -0.0525f));
+    blLegTop->setPosition(glm::vec3(0.05f, 0.2025f, 0.0525f));
     blLegBot->setPosition(glm::vec3(0.0f, 0.2f, 0.0f));
     blLegHoof->setPosition(glm::vec3(0.0f, 0.2f, 0.0f));
 
     blLegTop->addChildNode(blLegBot);
     blLegBot->addChildNode(blLegHoof);
+
+
+    //Back right leg
+    brLegTop->setRotation(glm::vec3(0.0f, 0.0f, -90.0f));
+    brLegTop->setPosition(glm::vec3(0.05f, 0.2025f, -0.0525f));
+    brLegBot->setPosition(glm::vec3(0.0f, 0.2f, 0.0f));
+    brLegHoof->setPosition(glm::vec3(0.0f, 0.2f, 0.0f));
+
+    brLegTop->addChildNode(brLegBot);
+    brLegBot->addChildNode(brLegHoof);
 
 
     //Neck & head
@@ -105,8 +102,29 @@ Horse::Horse() : IRenderNode("Horse")
     addChildNode(backTorso);
 }
 
+void Horse::showAxis(bool active)
+{
+    frontTorso->showAxis(active);
+    backTorso->showAxis(active);
+    tail->showAxis(active);
+    neck->showAxis(active);
+    head->showAxis(active);
+    frLegTop->showAxis(active);
+    frLegBot->showAxis(active);
+    frLegHoof->showAxis(active);
+    flLegTop->showAxis(active);
+    flLegBot->showAxis(active);
+    flLegHoof->showAxis(active);
+    brLegTop->showAxis(active);
+    brLegBot->showAxis(active);
+    brLegHoof->showAxis(active);
+    blLegTop->showAxis(active);
+    blLegBot->showAxis(active);
+    blLegHoof->showAxis(active);
+}
 
-HorseTorso::HorseTorso(glm::vec3 color, std::string name) : IRenderNode(std::move(name))
+
+HorseTorso::HorseTorso(glm::vec3 color, std::string name) : IRenderAxisNode(std::move(name))
 {
     std::shared_ptr<Cube> basePart = std::make_shared<Cube>(color);
     basePart->setScale(glm::vec3(0.2f, 0.25f, 0.2f));
@@ -114,7 +132,7 @@ HorseTorso::HorseTorso(glm::vec3 color, std::string name) : IRenderNode(std::mov
 }
 
 
-HorseTail::HorseTail(std::string name) : IRenderNode(std::move(name))
+HorseTail::HorseTail(std::string name) : IRenderAxisNode(std::move(name))
 {
     std::shared_ptr<Cube> basePart = std::make_shared<Cube>(glm::vec3(0.2f));
     basePart->setScale(glm::vec3(0.05f, 0.35f, 0.05f));
@@ -122,7 +140,7 @@ HorseTail::HorseTail(std::string name) : IRenderNode(std::move(name))
 }
 
 
-HorseLegTop::HorseLegTop(std::string name) : IRenderNode(std::move(name))
+HorseLegTop::HorseLegTop(std::string name) : IRenderAxisNode(std::move(name))
 {
     std::shared_ptr<Cube> basePart = std::make_shared<Cube>(glm::vec3(0.3f));
     basePart->setScale(glm::vec3(0.075f, 0.2f, 0.075f));
@@ -130,7 +148,7 @@ HorseLegTop::HorseLegTop(std::string name) : IRenderNode(std::move(name))
 }
 
 
-HorseLegBot::HorseLegBot(std::string name) : IRenderNode(std::move(name))
+HorseLegBot::HorseLegBot(std::string name) : IRenderAxisNode(std::move(name))
 {
     std::shared_ptr<Cube> basePart = std::make_shared<Cube>(glm::vec3(0.4f));
     basePart->setScale(glm::vec3(0.075f, 0.2f, 0.075f));
@@ -138,7 +156,7 @@ HorseLegBot::HorseLegBot(std::string name) : IRenderNode(std::move(name))
 }
 
 
-HorseLegHoof::HorseLegHoof(std::string name) : IRenderNode(std::move(name))
+HorseLegHoof::HorseLegHoof(std::string name) : IRenderAxisNode(std::move(name))
 {
     std::shared_ptr<Cube> basePart = std::make_shared<Cube>(glm::vec3(0.5f));
     basePart->setScale(glm::vec3(0.075f, 0.07f, 0.075f));

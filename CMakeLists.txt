@@ -46,6 +46,9 @@ find_package(glfw3 CONFIG REQUIRED)
 hunter_add_package(glm)
 find_package(glm CONFIG REQUIRED)
 
+hunter_add_package(PNG)
+find_package(PNG CONFIG REQUIRED)
+
 
 #------------------------------------------------------------------------------
 # Non-Hunter Dependencies
@@ -62,19 +65,32 @@ set(SRCS
     src/main.cpp
     src/Camera.hpp
     src/Camera.cpp
+    src/PNGLoader.hpp
     src/Renderer.hpp
     src/Renderer.cpp
     src/Shader.hpp
     src/Shader.cpp
     src/ShaderGuard.hpp
+    src/TextureGuard.hpp
     src/VAOGuard.hpp
     src/Window.hpp
     src/Window.cpp
+    src/objects/AxisLines.hpp
+    src/objects/AxisLines.cpp
+    src/objects/Cube.hpp
+    src/objects/Cube.cpp
+    src/objects/FloorGrid.hpp
+    src/objects/FloorGrid.cpp
+    src/objects/Horse.hpp
+    src/objects/Horse.cpp
     src/objects/IRenderNode.hpp
     src/objects/IRenderNode.cpp
+    src/objects/IRenderAxisNode.hpp
+    src/objects/IRenderAxisNode.cpp
     src/objects/TestSquare.hpp
     src/objects/TestSquare.cpp
-    src/objects/SceneRoot.hpp src/objects/FloorGrid.cpp src/objects/FloorGrid.hpp src/objects/AxisLines.cpp src/objects/AxisLines.hpp src/objects/Horse.cpp src/objects/Horse.hpp src/objects/Cube.cpp src/objects/Cube.hpp)
+    src/objects/SceneRoot.hpp
+)
 
 
 #------------------------------------------------------------------------------
@@ -84,6 +100,12 @@ set(SRCS
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/shaders)
 configure_file(shaders/generic.vert shaders/generic.vert COPYONLY)
 configure_file(shaders/generic.frag shaders/generic.frag COPYONLY)
+configure_file(shaders/texture.vert shaders/texture.vert COPYONLY)
+configure_file(shaders/texture.frag shaders/texture.frag COPYONLY)
+
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/data)
+configure_file(data/grass.png data/grass.png COPYONLY)
+configure_file(data/horse.png data/horse.png COPYONLY)
 
 
 #------------------------------------------------------------------------------
@@ -96,4 +118,5 @@ target_link_libraries(${PROJECT_NAME}
     glfw
     glm
     OpenGL::GL
+    PNG::png
 )

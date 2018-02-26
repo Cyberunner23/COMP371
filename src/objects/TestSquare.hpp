@@ -2,10 +2,11 @@
 #pragma once
 
 #include "IRenderNode.hpp"
+#include "../PNGLoader.hpp"
 
 class TestSquare : public IRenderNode
 {
 public:
-    TestSquare();
+    explicit TestSquare(float scale = 1);
 };
 
