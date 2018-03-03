@@ -7,10 +7,6 @@ Renderer::Renderer(std::unique_ptr<Shader>&& genericShader, std::unique_ptr<Shad
         , _blendedShader(std::move(blendedShader))
         , _texRatio(0.0f)
 {
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
-    glFrontFace(GL_CCW);
-
     glGenFramebuffers(1, &_frameBuffer);
     glGenRenderbuffers(1, &_depthBuffer);
     glGenTextures(1, &_renderTexture);

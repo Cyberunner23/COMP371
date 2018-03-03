@@ -98,6 +98,10 @@ int main(int argc, char** argv)
     sceneRoot->addChildNode(floorGrid);
     sceneRoot->addChildNode(horse);
 
+    auto cube = std::make_shared<Cube>();
+    sceneRoot->addChildNode(cube);
+
+
     //Add scene root to world
     renderer->addRenderObject(sceneRoot);
 

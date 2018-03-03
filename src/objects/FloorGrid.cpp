@@ -43,6 +43,7 @@ void FloorGrid::generateSquare(int posX, int posZ)
     {
         glm::vec3 translated = glm::vec3(squareXZ[i].x + posX, squareXZ[i].y , squareXZ[i].z + posZ);
         _mesh.push_back(translated);
+        _normals.emplace_back(0.0f, 1.0f, 0.0f);
     }
 
     _uvs.insert(_uvs.end(), squareUV.begin(), squareUV.end());

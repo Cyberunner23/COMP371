@@ -12,6 +12,7 @@ IRenderNode::IRenderNode()
     glGenBuffers(1, &_VBO);
     glGenBuffers(1, &_CBO);
     glGenBuffers(1, &_UVBO);
+    glGenBuffers(1, &_NBO);
 }
 
 IRenderNode::IRenderNode(std::string name) : IRenderNode()
@@ -136,20 +137,26 @@ void IRenderNode::uploadToGPU()
 
     //Vertices
     glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*_mesh.size(), &_mesh[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * _mesh.size(), &_mesh[0], GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
     //Line Colors
     glBindBuffer(GL_ARRAY_BUFFER, _CBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*_colors.size(), &_colors[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * _colors.size(), &_colors[0], GL_STATIC_DRAW);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(1);
 
     //UVs
     glBindBuffer(GL_ARRAY_BUFFER, _UVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*_uvs.size(), &_uvs[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * _uvs.size(), &_uvs[0], GL_STATIC_DRAW);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(2);
+
+    //Normals
+    glBindBuffer(GL_ARRAY_BUFFER, _NBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * _normals.size(), &_normals[0], GL_STATIC_DRAW);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(3);
 
 }

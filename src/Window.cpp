@@ -103,7 +103,10 @@ void Window::initGL()
     glfwGetFramebufferSize(_window, &width, &height);
     glViewport(0, 0, width, height);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
     glDepthFunc(GL_LESS);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
 }
 
 

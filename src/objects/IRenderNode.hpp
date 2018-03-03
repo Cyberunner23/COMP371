@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -53,6 +52,7 @@ protected:
     GLuint _VBO;
     GLuint _CBO;
     GLuint _UVBO; //BO for the UVs
+    GLuint _NBO; //BO for the norms
     std::unique_ptr<GLuint> _texture; //Texture for the object
 
     glm::vec3 _position;
@@ -62,6 +62,7 @@ protected:
 
     std::vector<glm::vec3> _mesh;
     std::vector<glm::vec3> _colors;
+    std::vector<glm::vec3> _normals;
     std::vector<glm::vec2> _uvs;
 
     std::vector<std::shared_ptr<IRenderNode>> _childNodes;
