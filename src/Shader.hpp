@@ -30,6 +30,7 @@ public:
     void unUseShader();
 
     bool setUniformM4fv(std::string uniformName, glm::mat4 &matrix);
+    bool setUniform1f(std::string uniformName, float &value);
 
 private:
 

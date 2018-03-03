@@ -140,24 +140,16 @@ void IRenderNode::uploadToGPU()
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glEnableVertexAttribArray(0);
 
-    if (!hasTexture())
-    {
-        //Line Colors
-        glBindBuffer(GL_ARRAY_BUFFER, _CBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*_colors.size(), &_colors[0], GL_STATIC_DRAW);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-        glEnableVertexAttribArray(1);
-    }
-    else
-    {
-        //UVs
-        glBindBuffer(GL_ARRAY_BUFFER, _UVBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*_uvs.size(), &_uvs[0], GL_STATIC_DRAW);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
-        glEnableVertexAttribArray(1);
-    }
+    //Line Colors
+    glBindBuffer(GL_ARRAY_BUFFER, _CBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*_colors.size(), &_colors[0], GL_STATIC_DRAW);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(1);
 
-
-
+    //UVs
+    glBindBuffer(GL_ARRAY_BUFFER, _UVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*_uvs.size(), &_uvs[0], GL_STATIC_DRAW);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glEnableVertexAttribArray(2);
 
 }

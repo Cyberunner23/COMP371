@@ -41,6 +41,19 @@ bool Shader::setUniformM4fv(std::string uniformName, glm::mat4 &matrix)
     return true;
 }
 
+bool Shader::setUniform1f(std::string uniformName, float &value)
+{
+    GLint loc = glGetUniformLocation(_programID, uniformName.c_str());
+    if (loc < 0)
+    {
+        return false;
+    }
+
+    glUniform1f(loc, value);
+
+    return true;
+}
+
 
 std::string Shader::loadShaderProgram(std::string &shaderName)
 {

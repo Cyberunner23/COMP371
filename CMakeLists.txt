@@ -102,6 +102,8 @@ configure_file(shaders/generic.vert shaders/generic.vert COPYONLY)
 configure_file(shaders/generic.frag shaders/generic.frag COPYONLY)
 configure_file(shaders/texture.vert shaders/texture.vert COPYONLY)
 configure_file(shaders/texture.frag shaders/texture.frag COPYONLY)
+configure_file(shaders/blended.vert shaders/blended.vert COPYONLY)
+configure_file(shaders/blended.frag shaders/blended.frag COPYONLY)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/data)
 configure_file(data/grass.png data/grass.png COPYONLY)

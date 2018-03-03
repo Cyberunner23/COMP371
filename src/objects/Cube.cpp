@@ -1,6 +1,3 @@
-//
-// Created by cyberunner23 on 2/4/18.
-//
 
 #include "Cube.hpp"
 

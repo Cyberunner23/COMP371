@@ -13,7 +13,7 @@
 #include "objects/Horse.hpp"
 #include "objects/SceneRoot.hpp"
 #include "objects/FloorGrid.hpp"
-#include "objects/TestSquare.hpp"
+#include "objects/Cube.hpp"
 
 
 //------------------------------------------------------------------------------
@@ -53,6 +53,8 @@ bool isMMouseButtonPressed;
 bool isMMousePosRegistered;
 glm::vec2 initMMousePos;
 
+float texRatio = 0.0f;
+
 
 
 const float  camSpeedFactor   = 0.05;
@@ -76,8 +78,8 @@ int main(int argc, char** argv)
 
     //Load the shader and create renderer
     std::unique_ptr<Shader> genericShader = std::make_unique<Shader>("generic");
-    std::unique_ptr<Shader> textureShader = std::make_unique<Shader>("texture");
-    renderer = std::make_unique<Renderer>(std::move(genericShader), std::move(textureShader));
+    std::unique_ptr<Shader> blendedShader = std::make_unique<Shader>("blended");
+    renderer = std::make_unique<Renderer>(std::move(genericShader), std::move(blendedShader));
 
     //Create Scene objects
     sceneRoot = std::make_shared<SceneRoot>();
@@ -86,7 +88,7 @@ int main(int argc, char** argv)
     horse = std::make_shared<Horse>();
     horse->setPosition(glm::vec3(0.35f, 0.52f, 0.5f));
 
-    horse->showAxis(true);
+    horse->showAxis(false);
 
 
     floorGrid->setPosition(glm::vec3(0.0f, -0.005f, 0.0f));
@@ -95,9 +97,6 @@ int main(int argc, char** argv)
     sceneRoot->addChildNode(axis);
     sceneRoot->addChildNode(floorGrid);
     sceneRoot->addChildNode(horse);
-
-    std::shared_ptr<TestSquare> square = std::make_shared<TestSquare>(10);
-    sceneRoot->addChildNode(square);
 
     //Add scene root to world
     renderer->addRenderObject(sceneRoot);
@@ -258,6 +257,20 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
 
             switch (key)
             {
+                case GLFW_KEY_X:
+                {
+                    if (texRatio == 0.0f)
+                    {
+                        texRatio = 1.0f;
+                    }
+                    else
+                    {
+                        texRatio = 0.0f;
+                    }
+
+                    renderer->setTexRatio(texRatio);
+                    break;
+                }
                 case GLFW_KEY_W:
                 {
                     glm::vec3 hRotation = horse->getRotation();
