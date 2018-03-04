@@ -31,6 +31,7 @@ public:
 
     bool setUniformM4fv(std::string uniformName, glm::mat4 &matrix);
     bool setUniform1f(std::string uniformName, float &value);
+    bool setUniform3f(std::string uniformName, glm::vec3 &value);
 
 private:
 

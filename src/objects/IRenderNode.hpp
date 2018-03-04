@@ -41,6 +41,10 @@ public:
     GLenum getRenderMode();
     GLsizei getMeshSize();
     glm::mat4 getModelMatrix();
+    void setFinalModelMat(const glm::mat4& mat)
+    {
+        _finalModelMat = mat;
+    }
 
 protected:
 
@@ -59,6 +63,7 @@ protected:
     glm::vec3 _scale;
     glm::vec3 _rotation;
     glm::mat4 _modelMatrix;
+    glm::mat4 _finalModelMat;
 
     std::vector<glm::vec3> _mesh;
     std::vector<glm::vec3> _colors;

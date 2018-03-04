@@ -15,9 +15,11 @@ Renderer::Renderer(std::unique_ptr<Shader>&& genericShader, std::unique_ptr<Shad
 
     //Setup texture
     glBindTexture(GL_TEXTURE_2D, _renderTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 2000, 2000, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 2000, 2000, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     //Setup depth buffer
@@ -51,6 +53,11 @@ void Renderer::setTexRatio(float ratio)
     _texRatio = ratio;
 }
 
+Light& Renderer::mutateLight()
+{
+    return _light;
+}
+
 void Renderer::addRenderObject(std::shared_ptr<IRenderNode> rootNode)
 {
     _objects.push_back(rootNode);
@@ -60,7 +67,7 @@ void Renderer::addRenderObject(std::shared_ptr<IRenderNode> rootNode)
 void Renderer::render(glm::mat4 vpMatrix)
 {
     //Render all objects in world
-    for (std::shared_ptr<IRenderNode> root : _objects)
+    for (const std::shared_ptr<IRenderNode>& root : _objects)
     {
         recursiveRender(vpMatrix, glm::mat4(1.0f), root);
     }
@@ -75,15 +82,22 @@ void Renderer::recursiveRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::shared_pt
     glm::mat4 currentModelMat = CTM * currentNode->getModelMatrix();
     std::vector<std::shared_ptr<IRenderNode>>* children = currentNode->getChildren();
 
-    //std::cout << "HIT" << std::endl;
+    currentNode->setFinalModelMat(currentModelMat);
 
     //render
     VAOGuard vGuard(currentNode->getVAO());
     std::unique_ptr<ShaderGuard> sGuard;
     std::unique_ptr<TextureGuard> tGuard;
+
     if (!currentNode->hasTexture())
     {
         sGuard = std::make_unique<ShaderGuard>(_genericShader);
+
+        glm::mat4 MVP = vpMatrix * currentModelMat;
+        if (!_genericShader->setUniformM4fv("MVP", MVP))
+        {
+            std::cout << "ERROR: failed to set the MVP" << std::endl;
+        }
     }
     else
     {
@@ -93,14 +107,24 @@ void Renderer::recursiveRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::shared_pt
         {
             std::cout << "ERROR: failed to set the colorTexRatio" << std::endl;
         }
+
+        glm::mat4 MM = currentModelMat;
+        if (!_blendedShader->setUniformM4fv("MM", MM))
+        {
+            std::cout << "ERROR: failed to set the MM" << std::endl;
+        }
+
+        setLightStruct(*_blendedShader);
+
+        glm::mat4 MVP = vpMatrix * currentModelMat;
+        if (!_blendedShader->setUniformM4fv("MVP", MVP))
+        {
+            std::cout << "ERROR: failed to set the MVP" << std::endl;
+        }
     }
 
 
-    glm::mat4 MVP = vpMatrix * currentModelMat;
-    if (!_genericShader->setUniformM4fv("MVP", MVP))
-    {
-        std::cout << "ERROR: failed to set the MVP" << std::endl;
-    }
+
 
     glPolygonMode(GL_FRONT_AND_BACK, _polygonMode);
     glDrawArrays(currentNode->getRenderMode(), 0, (GLsizei)currentNode->getMeshSize());
@@ -110,5 +134,45 @@ void Renderer::recursiveRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::shared_pt
     for (std::shared_ptr<IRenderNode> const &node : *children)
     {
         recursiveRender(vpMatrix, currentModelMat, node);
+    }
+}
+
+
+void Renderer::setLightStruct(Shader& shader)
+{
+    if (!shader.setUniform3f("camPos", _light.camPos))
+    {
+        std::cout << "ERROR: failed to set light.camPos " << _light.camPos.x << " " << _light.camPos.y << " " << _light.camPos.z <<std::endl;
+    }
+
+    if (!shader.setUniform3f("lightPos", _light.lightPos))
+    {
+        std::cout << "ERROR: failed to set light.lightPos" << std::endl;
+    }
+
+    if (!shader.setUniform3f("lightColor", _light.lightColor))
+    {
+        std::cout << "ERROR: failed to set light.lightColor" << std::endl;
+    }
+
+
+    if (!shader.setUniform1f("ambientStrength", _light.ambientStrength))
+    {
+        std::cout << "ERROR: failed to set light.ambientStrength" << std::endl;
+    }
+
+    if (!shader.setUniform1f("diffuseStrength", _light.diffuseStrength))
+    {
+        std::cout << "ERROR: failed to set light.diffuseStrength" << std::endl;
+    }
+
+    if (!shader.setUniform1f("specularStrength", _light.specularStrength))
+    {
+        std::cout << "ERROR: failed to set light.specularStrength" << std::endl;
+    }
+
+    if (!shader.setUniform1f("shinyCoeff", _light.shinyCoeff))
+    {
+        std::cout << "ERROR: failed to set light.shinyCoeff" << std::endl;
     }
 }

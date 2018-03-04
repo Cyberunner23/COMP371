@@ -11,6 +11,7 @@
 #include "Window.hpp"
 #include "objects/AxisLines.hpp"
 #include "objects/Horse.hpp"
+#include "objects/LightObject.hpp"
 #include "objects/SceneRoot.hpp"
 #include "objects/FloorGrid.hpp"
 #include "objects/Cube.hpp"
@@ -39,6 +40,7 @@ std::unique_ptr<Renderer> renderer;
 std::shared_ptr<SceneRoot> sceneRoot;
 std::shared_ptr<Horse> horse;
 std::unique_ptr<Camera> camera;
+std::shared_ptr<LightObject> lightObj;
 
 
 bool isLMouseButtonPressed;
@@ -54,7 +56,8 @@ bool isMMousePosRegistered;
 glm::vec2 initMMousePos;
 
 float texRatio = 0.0f;
-
+float lightHeight = 20.0f;
+Light light;
 
 
 const float  camSpeedFactor   = 0.05;
@@ -77,8 +80,15 @@ int main(int argc, char** argv)
     camera->setPos(glm::vec3(0.55f, 0.55f, 5.0f));
 
     //Load the shader and create renderer
+    light.lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    light.camPos = camera->getPos();
+    light.ambientStrength = 0.2f;
+    light.diffuseStrength = 1.0f;
+    light.specularStrength = 0.2f;
+    light.shinyCoeff = 1000.0f;
+
     std::unique_ptr<Shader> genericShader = std::make_unique<Shader>("generic");
-    std::unique_ptr<Shader> blendedShader = std::make_unique<Shader>("blended");
+    std::unique_ptr<Shader> blendedShader = std::make_unique<Shader>("blended_light");
     renderer = std::make_unique<Renderer>(std::move(genericShader), std::move(blendedShader));
 
     //Create Scene objects
@@ -87,6 +97,10 @@ int main(int argc, char** argv)
     std::shared_ptr<FloorGrid> floorGrid = std::make_shared<FloorGrid>();
     horse = std::make_shared<Horse>();
     horse->setPosition(glm::vec3(0.35f, 0.52f, 0.5f));
+
+    lightObj = std::make_shared<LightObject>();
+    lightObj->setPosition(glm::vec3(0.35, lightHeight, 0.5f));
+    light.lightPos = lightObj->getTransformedPosition();
 
     horse->showAxis(false);
 
@@ -97,10 +111,7 @@ int main(int argc, char** argv)
     sceneRoot->addChildNode(axis);
     sceneRoot->addChildNode(floorGrid);
     sceneRoot->addChildNode(horse);
-
-    auto cube = std::make_shared<Cube>();
-    sceneRoot->addChildNode(cube);
-
+    sceneRoot->addChildNode(lightObj);
 
     //Add scene root to world
     renderer->addRenderObject(sceneRoot);
@@ -117,6 +128,8 @@ int main(int argc, char** argv)
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        light.lightPos = lightObj->getTransformedPosition();
+        renderer->mutateLight() = light;
         renderer->render(vpMatrix);
 
         mainWindow->swapBuffers();
@@ -176,6 +189,8 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
                 {
                     glm::vec3 hPosition = horse->getPosition();
                     hPosition = glm::vec3(hPosition.x , hPosition.y, hPosition.z - 1.0f);
+                    lightObj->setPosition(glm::vec3(hPosition.x, lightHeight, hPosition.z));
+                    light.lightPos = lightObj->getTransformedPosition();
                     horse->setPosition(std::move(hPosition));
                     break;
                 }
@@ -183,6 +198,8 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
                 {
                     glm::vec3 hPosition = horse->getPosition();
                     hPosition = glm::vec3(hPosition.x, hPosition.y, hPosition.z + 1.0f);
+                    lightObj->setPosition(glm::vec3(hPosition.x, lightHeight, hPosition.z));
+                    light.lightPos = lightObj->getTransformedPosition();
                     horse->setPosition(std::move(hPosition));
                     break;
                 }
@@ -190,6 +207,8 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
                 {
                     glm::vec3 hPosition = horse->getPosition();
                     hPosition = glm::vec3(hPosition.x + 1.0f, hPosition.y, hPosition.z);
+                    lightObj->setPosition(glm::vec3(hPosition.x, lightHeight, hPosition.z));
+                    light.lightPos = lightObj->getTransformedPosition();
                     horse->setPosition(std::move(hPosition));
                     break;
                 }
@@ -197,6 +216,8 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
                 {
                     glm::vec3 hPosition = horse->getPosition();
                     hPosition = glm::vec3(hPosition.x - 1.0f, hPosition.y, hPosition.z);
+                    lightObj->setPosition(glm::vec3(hPosition.x, lightHeight, hPosition.z));
+                    light.lightPos = lightObj->getTransformedPosition();
                     horse->setPosition(std::move(hPosition));
                     break;
                 }
@@ -419,6 +440,7 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
             }
 
             camera->setPos(position);
+            light.camPos = camera->getPos();
         }
     }
 }

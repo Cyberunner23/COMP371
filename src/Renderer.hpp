@@ -8,6 +8,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
 
+#include "Light.hpp"
 #include "VAOGuard.hpp"
 #include "Shader.hpp"
 #include "ShaderGuard.hpp"
@@ -28,6 +29,7 @@ public:
 
     void setPolygonMode(GLenum polygonMode);
     void setTexRatio(float ratio);
+    Light& mutateLight();
     void addRenderObject(std::shared_ptr<IRenderNode> rootNode);
 
     void render(glm::mat4 vpMatrix);
@@ -35,6 +37,7 @@ public:
 private:
 
     float _texRatio;
+    Light _light;
 
     std::unique_ptr<Shader> _genericShader;
     std::unique_ptr<Shader> _blendedShader;
@@ -52,4 +55,5 @@ private:
 
     void recursiveRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::shared_ptr<IRenderNode> currentNode);
 
+    void setLightStruct(Shader& shader);
 };

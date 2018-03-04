@@ -54,6 +54,20 @@ bool Shader::setUniform1f(std::string uniformName, float &value)
     return true;
 }
 
+bool Shader::setUniform3f(std::string uniformName, glm::vec3 &value)
+{
+    GLint loc = glGetUniformLocation(_programID, uniformName.c_str());
+    if (loc < 0)
+    {
+        std::cout << "LOC " << loc << std::endl;
+        return false;
+    }
+
+    glUniform3f(loc, value.x, value.y, value.z);
+
+    return true;
+}
+
 
 std::string Shader::loadShaderProgram(std::string &shaderName)
 {
