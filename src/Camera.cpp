@@ -39,6 +39,11 @@ void Camera::onWindowResize(int newWidth, int newHeight)
     _vpMatrix = computeViewProjectionMatrix();
 }
 
+void Camera::forceGLViewportResize()
+{
+    glViewport(0, 0, (GLsizei)_windowSize.x, (GLsizei)_windowSize.y);
+}
+
 
 glm::mat4 Camera::getViewProjectionMatrix()
 {
@@ -49,7 +54,7 @@ glm::mat4 Camera::getViewProjectionMatrix()
 glm::mat4 Camera::computeViewProjectionMatrix()
 {
     glm::mat4 lookAt = glm::lookAt(_camPos, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    glm::mat4 projectionMat = glm::perspective(glm::radians(_fov), _windowSize.x / _windowSize.y, 0.1f, 100.0f);
+    glm::mat4 projectionMat = glm::perspective(glm::radians(_fov), _windowSize.x / _windowSize.y, 0.1f, 10000.0f);
 
     return projectionMat * lookAt;
 }

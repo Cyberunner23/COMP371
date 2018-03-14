@@ -39,7 +39,8 @@ std::unique_ptr<Window> mainWindow;
 std::unique_ptr<Renderer> renderer;
 std::shared_ptr<SceneRoot> sceneRoot;
 std::shared_ptr<Horse> horse;
-std::unique_ptr<Camera> camera;
+std::shared_ptr<Camera> camera;
+std::shared_ptr<Camera> shadowCamera;
 std::shared_ptr<LightObject> lightObj;
 
 
@@ -68,7 +69,7 @@ int main(int argc, char** argv)
 
     //Create window and camera
     mainWindow = std::make_unique<Window>(InitWindowWidth, InitWindowHeight, "COMP371 Project by Alex Frappier Lachapelle (40019133)");
-    camera = std::make_unique<Camera>(InitWindowWidth, InitWindowHeight, 45.0f);
+    camera = std::make_shared<Camera>(InitWindowWidth, InitWindowHeight, 45.0f);
 
     //Set callbacks
     mainWindow->setWindowSizeCallback(windowSizeCallback);
@@ -89,7 +90,12 @@ int main(int argc, char** argv)
 
     std::unique_ptr<Shader> genericShader = std::make_unique<Shader>("generic");
     std::unique_ptr<Shader> blendedShader = std::make_unique<Shader>("blended_light");
-    renderer = std::make_unique<Renderer>(std::move(genericShader), std::move(blendedShader));
+    std::unique_ptr<Shader> shadowShader = std::make_unique<Shader>("shadow");
+    renderer = std::make_unique<Renderer>(
+            std::move(genericShader),
+            std::move(blendedShader),
+            std::move(shadowShader),
+            camera);
 
     //Create Scene objects
     sceneRoot = std::make_shared<SceneRoot>();
@@ -116,21 +122,17 @@ int main(int argc, char** argv)
     //Add scene root to world
     renderer->addRenderObject(sceneRoot);
 
-
-
     //Render loop
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     while (!mainWindow->shouldClose())
     {
         mainWindow->pollEvents();
 
-        glm::mat4 vpMatrix = camera->getViewProjectionMatrix();
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         light.lightPos = lightObj->getTransformedPosition();
         renderer->mutateLight() = light;
-        renderer->render(vpMatrix);
+        renderer->render();
 
         mainWindow->swapBuffers();
         glfwPollEvents();

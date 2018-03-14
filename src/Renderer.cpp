@@ -1,45 +1,37 @@
 
 #include "Renderer.hpp"
 
-Renderer::Renderer(std::unique_ptr<Shader>&& genericShader, std::unique_ptr<Shader>&& blendedShader)
-        : _polygonMode(GL_TRIANGLES)
-        , _genericShader(std::move(genericShader))
+Renderer::Renderer(std::unique_ptr<Shader>&& genericShader,
+                   std::unique_ptr<Shader>&& blendedShader,
+                   std::unique_ptr<Shader>&& shadowShader,
+                   std::shared_ptr<Camera> mainCamera)
+        : _genericShader(std::move(genericShader))
         , _blendedShader(std::move(blendedShader))
+        , _shadowShader(std::move(shadowShader))
+        , _mainCamera(std::move(mainCamera))
+        , _shadowCamera(std::make_shared<Camera>(SHADOW_WIDTH, SHADOW_HEIGHT, 45.0))
+        , _polygonMode(GL_TRIANGLES)
         , _texRatio(0.0f)
 {
-    glGenFramebuffers(1, &_frameBuffer);
-    glGenRenderbuffers(1, &_depthBuffer);
-    glGenTextures(1, &_renderTexture);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);
+    _shadowCamera->setPos(glm::vec3(0.0f, 20.0f, 0.0f));
 
     //Setup texture
-    glBindTexture(GL_TEXTURE_2D, _renderTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 2000, 2000, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glGenTextures(1, &_depthMap);
+    glBindTexture(GL_TEXTURE_2D, _depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, SHADOW_WIDTH, SHADOW_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
-    //Setup depth buffer
-    glBindRenderbuffer(GL_RENDERBUFFER, _depthBuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 2000, 2000);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-
-    //Config framebuffer
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, _depthBuffer);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, _renderTexture, 0);
-
-    GLenum buffers[] = {GL_COLOR_ATTACHMENT0};
-    glDrawBuffers(1, buffers);
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    {
-        std::cout << "WARN: Failed to create framebuffer" << std::endl;
-    }
-
+    //Attach
+    glGenFramebuffers(1, &_depthMapFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, _depthMapFBO);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 }
 
 
@@ -64,13 +56,56 @@ void Renderer::addRenderObject(std::shared_ptr<IRenderNode> rootNode)
 }
 
 
-void Renderer::render(glm::mat4 vpMatrix)
+void Renderer::render()
 {
-    //Render all objects in world
+    //Shadow pass
+    _shadowCamera->forceGLViewportResize();
     for (const std::shared_ptr<IRenderNode>& root : _objects)
     {
-        recursiveRender(vpMatrix, glm::mat4(1.0f), root);
+        recursiveShadowRender(_shadowCamera->getViewProjectionMatrix(), glm::mat4(1.0f), root);
     }
+
+    //Render all objects in world
+    _mainCamera->forceGLViewportResize();
+    for (const std::shared_ptr<IRenderNode>& root : _objects)
+    {
+        recursiveRender(_mainCamera->getViewProjectionMatrix(), glm::mat4(1.0f), root);
+    }
+}
+
+
+void Renderer::recursiveShadowRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::shared_ptr<IRenderNode> currentNode)
+{
+    if (currentNode == nullptr) return;
+
+    //Compute new transformation
+    glm::mat4 currentModelMat = CTM * currentNode->getModelMatrix();
+    std::vector<std::shared_ptr<IRenderNode>>* children = currentNode->getChildren();
+
+    currentNode->setFinalModelMat(currentModelMat);
+
+    //Render
+    VAOGuard vGuard(currentNode->getVAO());
+    ShaderGuard sGuard(_shadowShader);
+    glm::mat4 MVP = vpMatrix * currentModelMat;
+
+    if (!_shadowShader->setUniformM4fv("MVP", MVP))
+    {
+        std::cout << "ERROR: failed to set the MVP" << std::endl;
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _depthMapFBO);
+        glClear(GL_DEPTH_BUFFER_BIT);
+        glPolygonMode(GL_FRONT_AND_BACK, _polygonMode);
+        glDrawArrays(currentNode->getRenderMode(), 0, (GLsizei)currentNode->getMeshSize());
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    //Recurse down the tree, render the child objects
+    for (std::shared_ptr<IRenderNode> const &node : *children)
+    {
+        recursiveShadowRender(vpMatrix, currentModelMat, node);
+    }
+
 }
 
 void Renderer::recursiveRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::shared_ptr<IRenderNode> currentNode)
@@ -121,10 +156,16 @@ void Renderer::recursiveRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::shared_pt
         {
             std::cout << "ERROR: failed to set the MVP" << std::endl;
         }
+
+        //Shadow
+        glm::mat4 shadowVP = _shadowCamera->getViewProjectionMatrix();
+        if (!_blendedShader->setUniformM4fv("LightSpaceVP", shadowVP))
+        {
+            std::cout << "ERROR: failed to set the LightSpaceVP" << std::endl;
+        }
+
+        //glBindTexture(GL_TEXTURE_2D, _depthMap);
     }
-
-
-
 
     glPolygonMode(GL_FRONT_AND_BACK, _polygonMode);
     glDrawArrays(currentNode->getRenderMode(), 0, (GLsizei)currentNode->getMeshSize());

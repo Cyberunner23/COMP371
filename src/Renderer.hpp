@@ -8,6 +8,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtx/transform.hpp"
 
+#include "Camera.hpp"
 #include "Light.hpp"
 #include "VAOGuard.hpp"
 #include "Shader.hpp"
@@ -20,39 +21,48 @@
  * since it is simple and we don't need that much efficiency
  * */
 
+static const unsigned int SHADOW_WIDTH = 2000;
+static const unsigned int SHADOW_HEIGHT = 2000;
+
 class Renderer
 {
 
 public:
 
-    explicit Renderer(std::unique_ptr<Shader>&& genericShader, std::unique_ptr<Shader>&& textureShader);
+    Renderer(std::unique_ptr<Shader>&& genericShader,
+             std::unique_ptr<Shader>&& textureShader,
+             std::unique_ptr<Shader>&& shadowShader,
+             std::shared_ptr<Camera> mainCamera);
 
     void setPolygonMode(GLenum polygonMode);
     void setTexRatio(float ratio);
     Light& mutateLight();
     void addRenderObject(std::shared_ptr<IRenderNode> rootNode);
 
-    void render(glm::mat4 vpMatrix);
+    void render();
 
 private:
 
     float _texRatio;
     Light _light;
 
+    std::shared_ptr<Camera> _mainCamera;
+    std::shared_ptr<Camera> _shadowCamera;
+
     std::unique_ptr<Shader> _genericShader;
     std::unique_ptr<Shader> _blendedShader;
+    std::unique_ptr<Shader> _shadowShader;
     GLenum _polygonMode;
 
     std::vector<std::shared_ptr<IRenderNode>> _objects;
 
-
     //Frame buffer to render the shadow points view
-    GLuint _frameBuffer = 0;
-    GLuint _depthBuffer = 0;
+    GLuint _depthMapFBO = 0;
     //Texture that will contain depth info for shadow mapping
-    GLuint _renderTexture = 0;
+    GLuint _depthMap = 0;
 
 
+    void recursiveShadowRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::shared_ptr<IRenderNode> currentNode);
     void recursiveRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::shared_ptr<IRenderNode> currentNode);
 
     void setLightStruct(Shader& shader);

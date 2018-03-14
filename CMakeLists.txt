@@ -107,6 +107,8 @@ configure_file(shaders/blended.vert shaders/blended.vert COPYONLY)
 configure_file(shaders/blended.frag shaders/blended.frag COPYONLY)
 configure_file(shaders/blended_light.vert shaders/blended_light.vert COPYONLY)
 configure_file(shaders/blended_light.frag shaders/blended_light.frag COPYONLY)
+configure_file(shaders/shadow.vert shaders/shadow.vert COPYONLY)
+configure_file(shaders/shadow.frag shaders/shadow.frag COPYONLY)
 
 file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/data)
 configure_file(data/grass.png data/grass.png COPYONLY)
