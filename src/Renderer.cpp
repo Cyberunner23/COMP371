@@ -13,7 +13,7 @@ Renderer::Renderer(std::unique_ptr<Shader>&& genericShader,
         , _polygonMode(GL_TRIANGLES)
         , _texRatio(0.0f)
 {
-    _shadowCamera->setPos(glm::vec3(0.0f, 10.0f, 0.0001f));
+    _shadowCamera->setPos(glm::vec3(0.0f, 10.0f, 0.2f));
 
 
     //Setup texture
@@ -31,7 +31,15 @@ Renderer::Renderer(std::unique_ptr<Shader>&& genericShader,
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthMap, 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        std::cout << "Framebuffer construction failed!" << std::endl;
+    }
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
 
 }
 
@@ -98,8 +106,8 @@ void Renderer::recursiveShadowRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::sha
     }
 
 
-        glClear(GL_DEPTH_BUFFER_BIT);
-        glDrawArrays(currentNode->getRenderMode(), 0, (GLsizei)currentNode->getMeshSize());
+    glClear(GL_DEPTH_BUFFER_BIT);
+    glDrawArrays(currentNode->getRenderMode(), 0, (GLsizei)currentNode->getMeshSize());
 
 
     //Recurse down the tree, render the child objects
@@ -139,8 +147,8 @@ void Renderer::recursiveRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::shared_pt
     else
     {
         sGuard = std::make_unique<ShaderGuard>(_blendedShader);
-        tGuard = std::make_unique<TextureGuard>(_blendedShader.get(), 0, "textureSampler", currentNode->getTexture());
-        tGuard = std::make_unique<TextureGuard>(_blendedShader.get(), 1, "shadowMap", _depthMap);
+        tGuard = std::make_unique<TextureGuard>(_blendedShader.get(), 0, "textureSampler", /*currentNode->getTexture()*/ _depthMap);
+        //tGuard = std::make_unique<TextureGuard>(_blendedShader.get(), 1, "shadowMap", _depthMap);
         if (!_blendedShader->setUniform1f("colorTexRatio", _texRatio))
         {
             std::cout << "ERROR: failed to set the colorTexRatio" << std::endl;
