@@ -12,13 +12,12 @@ class TextureGuard
 
 public:
 
-    explicit inline TextureGuard(GLuint texture)
+    TextureGuard() = delete;
+    inline TextureGuard(Shader* shader, int loc, std::string name, GLuint texID)
     {
-        glBindTexture(GL_TEXTURE_2D, texture);
-    }
-
-    inline ~TextureGuard()
-    {
-        glBindTexture(GL_TEXTURE_2D, 0);
+        if (!shader->setTexture(loc, name, texID))
+        {
+            std::cout << "Failed to set \"" << name <<"\" at location " << loc << std::endl;
+        }
     }
 };

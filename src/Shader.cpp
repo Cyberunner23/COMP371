@@ -59,13 +59,54 @@ bool Shader::setUniform3f(std::string uniformName, glm::vec3 &value)
     GLint loc = glGetUniformLocation(_programID, uniformName.c_str());
     if (loc < 0)
     {
-        std::cout << "LOC " << loc << std::endl;
         return false;
     }
 
     glUniform3f(loc, value.x, value.y, value.z);
 
     return true;
+}
+
+bool Shader::setTexture(int location, std::string uniformName, GLuint texID)
+{
+
+    if (location < 0 || location > 2)
+    {
+        return false;
+    }
+
+    GLint loc = glGetUniformLocation(_programID, uniformName.c_str());
+    if (loc < 0)
+    {
+        return false;
+    }
+
+    glUniform1i(loc, location);
+
+    switch(location)
+    {
+        case 0:
+            glActiveTexture(GL_TEXTURE0);
+            //std::cout << "GL_TEXTURE0" << std::endl;
+            break;
+        case 1:
+            glActiveTexture(GL_TEXTURE1);
+            //std::cout << "GL_TEXTURE1" << std::endl;
+            break;
+        case 2:
+            glActiveTexture(GL_TEXTURE2);
+            //std::cout << "GL_TEXTURE2" << std::endl;
+            break;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, texID);
+
+    return true;
+}
+
+bool Shader::unSetTexture(int loc, std::string uniformName)
+{
+    return setTexture(loc, uniformName, 0);
 }
 
 
@@ -136,4 +177,3 @@ std::string Shader::linkShaderProgram()
 
     return "";
 }
-

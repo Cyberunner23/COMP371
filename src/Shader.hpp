@@ -33,6 +33,9 @@ public:
     bool setUniform1f(std::string uniformName, float &value);
     bool setUniform3f(std::string uniformName, glm::vec3 &value);
 
+    bool setTexture(int loc, std::string uniformName, GLuint texID);
+    bool unSetTexture(int loc, std::string uniformName);
+
 private:
 
     GLuint _programID = 0;

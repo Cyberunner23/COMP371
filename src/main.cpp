@@ -40,7 +40,6 @@ std::unique_ptr<Renderer> renderer;
 std::shared_ptr<SceneRoot> sceneRoot;
 std::shared_ptr<Horse> horse;
 std::shared_ptr<Camera> camera;
-std::shared_ptr<Camera> shadowCamera;
 std::shared_ptr<LightObject> lightObj;
 
 
