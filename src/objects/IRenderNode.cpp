@@ -78,6 +78,12 @@ void IRenderNode::setRotation(const glm::vec3&& rotation)
     _modelMatrix = computeModelMatrix();
 }
 
+void IRenderNode::setRotation(const glm::vec3 &rotation)
+{
+    _rotation = rotation;
+    _modelMatrix = computeModelMatrix();
+}
+
 void IRenderNode::rotate(const glm::vec3& rotation)
 {
     _rotation += rotation;

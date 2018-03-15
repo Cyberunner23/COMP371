@@ -32,6 +32,7 @@ public:
 
     glm::vec3 getRotation();
     void setRotation(const glm::vec3&& rotation);
+    void setRotation(const glm::vec3& rotation);
     void rotate(const glm::vec3& rotation);
 
     std::string getDebugName() {return _debugName;}

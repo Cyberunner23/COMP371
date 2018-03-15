@@ -13,8 +13,7 @@ Renderer::Renderer(std::unique_ptr<Shader>&& genericShader,
         , _polygonMode(GL_TRIANGLES)
         , _texRatio(0.0f)
 {
-    _shadowCamera->setPos(glm::vec3(0.0f, 10.0f, 0.2f));
-
+    _shadowCamera->setPos(glm::vec3(0.0f, 30.0f, 0.01f));
 
     //Setup texture
     glGenTextures(1, &_depthMap);
@@ -38,9 +37,6 @@ Renderer::Renderer(std::unique_ptr<Shader>&& genericShader,
     }
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-
-
 }
 
 
@@ -67,13 +63,17 @@ void Renderer::addRenderObject(std::shared_ptr<IRenderNode> rootNode)
 
 void Renderer::render()
 {
-    //Shadow pass
+
     glBindFramebuffer(GL_FRAMEBUFFER, _depthMapFBO);
+    glClear(GL_DEPTH_BUFFER_BIT);
+
+    //Shadow pass
     _shadowCamera->forceGLViewportResize();
     for (const std::shared_ptr<IRenderNode>& root : _objects)
     {
         recursiveShadowRender(_shadowCamera->getViewProjectionMatrix(), glm::mat4(1.0f), root);
     }
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     //Render all objects in world
@@ -89,6 +89,8 @@ void Renderer::recursiveShadowRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::sha
 {
     if (currentNode == nullptr) return;
 
+    //_shadowCamera->setPos(_light.lightPos);
+
     //Compute new transformation
     glm::mat4 currentModelMat = CTM * currentNode->getModelMatrix();
     std::vector<std::shared_ptr<IRenderNode>>* children = currentNode->getChildren();
@@ -97,6 +99,7 @@ void Renderer::recursiveShadowRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::sha
 
     //Render
     VAOGuard vGuard(currentNode->getVAO());
+    glBindTexture(GL_TEXTURE_2D, _depthMap);
     ShaderGuard sGuard(_shadowShader);
     glm::mat4 MVP = vpMatrix * currentModelMat;
 
@@ -106,8 +109,9 @@ void Renderer::recursiveShadowRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::sha
     }
 
 
-    glClear(GL_DEPTH_BUFFER_BIT);
+    //glClear(GL_DEPTH_BUFFER_BIT);
     glDrawArrays(currentNode->getRenderMode(), 0, (GLsizei)currentNode->getMeshSize());
+
 
 
     //Recurse down the tree, render the child objects
@@ -115,6 +119,8 @@ void Renderer::recursiveShadowRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::sha
     {
         recursiveShadowRender(vpMatrix, currentModelMat, node);
     }
+
+
 
 }
 
@@ -147,8 +153,8 @@ void Renderer::recursiveRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::shared_pt
     else
     {
         sGuard = std::make_unique<ShaderGuard>(_blendedShader);
-        tGuard = std::make_unique<TextureGuard>(_blendedShader.get(), 0, "textureSampler", /*currentNode->getTexture()*/ _depthMap);
-        //tGuard = std::make_unique<TextureGuard>(_blendedShader.get(), 1, "shadowMap", _depthMap);
+        tGuard = std::make_unique<TextureGuard>(_blendedShader.get(), 0, "textureSampler", currentNode->getTexture());
+        tGuard = std::make_unique<TextureGuard>(_blendedShader.get(), 1, "shadowMap", _depthMap);
         if (!_blendedShader->setUniform1f("colorTexRatio", _texRatio))
         {
             std::cout << "ERROR: failed to set the colorTexRatio" << std::endl;
@@ -169,8 +175,8 @@ void Renderer::recursiveRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::shared_pt
         }
 
         //Shadow
-        glm::mat4 shadowVP = _shadowCamera->getViewProjectionMatrix();
-        if (!_blendedShader->setUniformM4fv("LightSpaceVP", shadowVP))
+        glm::mat4 shadowVP = _shadowCamera->getViewProjectionMatrix() * currentModelMat;
+        if (!_blendedShader->setUniformM4fv("ShadowMVP", shadowVP))
         {
             std::cout << "ERROR: failed to set the LightSpaceVP" << std::endl;
         }

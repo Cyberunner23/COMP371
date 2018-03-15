@@ -1,5 +1,7 @@
 
+#include <chrono>
 #include <iostream>
+#include <thread>
 #include <vector>
 
 #include "GL/glew.h"
@@ -58,6 +60,9 @@ glm::vec2 initMMousePos;
 float texRatio = 0.0f;
 float lightHeight = 20.0f;
 Light light;
+
+
+bool doAnim = false;
 
 
 const float  camSpeedFactor   = 0.05;
@@ -121,10 +126,36 @@ int main(int argc, char** argv)
     //Add scene root to world
     renderer->addRenderObject(sceneRoot);
 
+    double prevTime = glfwGetTime();
+    double delta = 0.0;
+    double FPS = 30.0;
+    double FPSIntervalDuration = 1.0 / FPS;
+    double sleepFor = 0.0;
+
+    unsigned int tickSkip = 0;
+
     //Render loop
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     while (!mainWindow->shouldClose())
     {
+        delta = glm::abs(prevTime - glfwGetTime());
+        prevTime = glfwGetTime();
+
+        sleepFor = FPSIntervalDuration - delta;
+        if (sleepFor < 0)
+        {
+            sleepFor = 0;
+        }
+
+        if (tickSkip == 0)
+        {
+            horse->tickAnim();
+        }
+
+        tickSkip = (tickSkip + 1) % 20;
+
+        std::this_thread::sleep_for(std::chrono::milliseconds((long)(sleepFor * 1000)));
+
         mainWindow->pollEvents();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -135,6 +166,9 @@ int main(int argc, char** argv)
 
         mainWindow->swapBuffers();
         glfwPollEvents();
+
+
+
     }
 
     return 0;
@@ -225,51 +259,71 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
                 case GLFW_KEY_0:
                 {
                     horse->blLegBot->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    glm::vec3 rot = horse->blLegBot->getRotation();
+                    std::cout << "blLegBot " << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 case GLFW_KEY_1:
                 {
                     horse->head->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    glm::vec3 rot = horse->head->getRotation();
+                    std::cout << "head" << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 case GLFW_KEY_2:
                 {
                     horse->neck->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    glm::vec3 rot = horse->neck->getRotation();
+                    std::cout<< "neck" << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 case GLFW_KEY_3:
                 {
                     horse->frLegTop->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    glm::vec3 rot = horse->frLegTop->getRotation();
+                    std::cout << "frLegTop " << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 case GLFW_KEY_4:
                 {
                     horse->frLegBot->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    glm::vec3 rot = horse->frLegBot->getRotation();
+                    std::cout << "frLegBot " << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 case GLFW_KEY_5:
                 {
                     horse->brLegTop->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    glm::vec3 rot = horse->brLegTop->getRotation();
+                    std::cout << "brLegTop " << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 case GLFW_KEY_6:
                 {
                     horse->brLegBot->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    glm::vec3 rot = horse->brLegBot->getRotation();
+                    std::cout << "brLegBot " << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 case GLFW_KEY_7:
                 {
                     horse->flLegTop->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    glm::vec3 rot = horse->flLegTop->getRotation();
+                    std::cout << "flLegTop " << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 case GLFW_KEY_8:
                 {
                     horse->flLegBot->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    glm::vec3 rot = horse->flLegBot->getRotation();
+                    std::cout << "flLegBot " << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 case GLFW_KEY_9:
                 {
                     horse->blLegTop->rotate(glm::vec3(0.0f, 0.0f, 5.0f));
+                    glm::vec3 rot = horse->blLegTop->getRotation();
+                    std::cout << "blLegTop " << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 default:
@@ -283,6 +337,10 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
 
             switch (key)
             {
+                case GLFW_KEY_R:
+                    doAnim = !doAnim;
+                    horse->doAnim(doAnim);
+                    break;
                 case GLFW_KEY_X:
                 {
                     if (texRatio == 0.0f)
@@ -389,51 +447,71 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
                 case GLFW_KEY_0:
                 {
                     horse->blLegBot->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    glm::vec3 rot = horse->blLegBot->getRotation();
+                    std::cout << "blLegBot " << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 case GLFW_KEY_1:
                 {
                     horse->head->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    glm::vec3 rot = horse->head->getRotation();
+                    std::cout << "head " << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 case GLFW_KEY_2:
                 {
                     horse->neck->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    glm::vec3 rot = horse->neck->getRotation();
+                    std::cout << "neck " << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 case GLFW_KEY_3:
                 {
                     horse->frLegTop->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    glm::vec3 rot = horse->frLegTop->getRotation();
+                    std::cout << "frLegTop " << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 case GLFW_KEY_4:
                 {
                     horse->frLegBot->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    glm::vec3 rot = horse->frLegBot->getRotation();
+                    std::cout << "frLegBot " << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 case GLFW_KEY_5:
                 {
                     horse->brLegTop->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    glm::vec3 rot = horse->brLegTop->getRotation();
+                    std::cout << "brLegTop " << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 case GLFW_KEY_6:
                 {
                     horse->brLegBot->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    glm::vec3 rot = horse->brLegBot->getRotation();
+                    std::cout << "brLegBot " << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 case GLFW_KEY_7:
                 {
                     horse->flLegTop->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    glm::vec3 rot = horse->flLegTop->getRotation();
+                    std::cout << "flLegTop " << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 case GLFW_KEY_8:
                 {
                     horse->flLegBot->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    glm::vec3 rot = horse->flLegBot->getRotation();
+                    std::cout << "flLegBot " << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 case GLFW_KEY_9:
                 {
                     horse->blLegTop->rotate(glm::vec3(0.0f, 0.0f, -5.0f));
+                    glm::vec3 rot = horse->blLegTop->getRotation();
+                    std::cout << "blLegTop " << rot.x << " " << rot.y << " " << rot.z << std::endl;
                     break;
                 }
                 default:

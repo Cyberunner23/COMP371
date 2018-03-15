@@ -100,6 +100,21 @@ Horse::Horse() : IRenderNode("Horse")
     frontTorso->addChildNode(flLegTop);
 
     addChildNode(backTorso);
+
+
+    //Animation
+
+
+    initfrTopRot = frLegTop->getRotation();
+    initflTopRot = flLegTop->getRotation();
+    initbrTopRot = brLegTop->getRotation();
+    initblTopRot = blLegTop->getRotation();
+    initfrBotRot = frLegBot->getRotation();
+    initflBotRot = flLegBot->getRotation();
+    initbrBotRot = brLegBot->getRotation();
+    initblBotRot = blLegBot->getRotation();
+
+
 }
 
 void Horse::showAxis(bool active)
@@ -121,6 +136,113 @@ void Horse::showAxis(bool active)
     blLegTop->showAxis(active);
     blLegBot->showAxis(active);
     blLegHoof->showAxis(active);
+}
+
+void Horse::tickAnim()
+{
+    if (_doAnim)
+    {
+        frFrameState = (frFrameState + 1) % _animLength;
+        flFrameState = (flFrameState + 1) % _animLength;
+        brFrameState = (brFrameState + 1) % _animLength;
+        blFrameState = (blFrameState + 1) % _animLength;
+
+        frontLegFrame(frFrameState, frLegTop, frLegBot);
+        frontLegFrame(flFrameState, flLegTop, flLegBot);
+
+        backLegFrame(brFrameState, brLegTop, brLegBot);
+        backLegFrame(blFrameState, blLegTop, blLegBot);
+    }
+}
+
+void Horse::doAnim(bool value)
+{
+
+    _doAnim = value;
+
+    if (value)
+    {
+        //Start anim
+        frFrameState = frFrameStart;
+        flFrameState = flFrameStart;
+        brFrameState = brFrameStart;
+        blFrameState = blFrameStart;
+    }
+    else
+    {
+        frLegTop->setRotation(initfrTopRot);
+        flLegTop->setRotation(initflTopRot);
+        brLegTop->setRotation(initbrTopRot);
+        blLegTop->setRotation(initblTopRot);
+        frLegBot->setRotation(initfrBotRot);
+        flLegBot->setRotation(initflBotRot);
+        brLegBot->setRotation(initbrBotRot);
+        blLegBot->setRotation(initblBotRot);
+    }
+
+}
+
+void Horse::frontLegFrame(unsigned int frameVal, std::shared_ptr<HorseLegTop> top, std::shared_ptr<HorseLegBot> bot)
+{
+
+    glm::vec3 currTopRot = top->getRotation();
+    glm::vec3 currBotRot = bot->getRotation();
+
+    switch (frameVal)
+    {
+        case 0:
+            currTopRot.z = -115;
+            currBotRot.z = 40;
+            break;
+        case 1:
+            currTopRot.z = -115;
+            currBotRot.z = 0;
+            break;
+        case 2:
+            currTopRot.z = -90;
+            currBotRot.z = 0;
+            break;
+        case 3:
+            currTopRot.z = -75;
+            currBotRot.z = 0;
+            break;
+        default:
+            assert(frameVal < 4);
+    }
+
+    top->setRotation(std::move(currTopRot));
+    bot->setRotation(std::move(currBotRot));
+}
+
+void Horse::backLegFrame(unsigned int frameVal, std::shared_ptr<HorseLegTop> top, std::shared_ptr<HorseLegBot> bot)
+{
+    glm::vec3 currTopRot = top->getRotation();
+    glm::vec3 currBotRot = bot->getRotation();
+
+    switch (frameVal)
+    {
+        case 0:
+            currTopRot.z = -75;
+            currBotRot.z = 0;
+            break;
+        case 1:
+            currTopRot.z = -90;
+            currBotRot.z = 0;
+            break;
+        case 2:
+            currTopRot.z = -95;
+            currBotRot.z = -25;
+            break;
+        case 3:
+            currTopRot.z = -90;
+            currBotRot.z = 0;
+            break;
+        default:
+            assert(frameVal < 4);
+    }
+
+    top->setRotation(std::move(currTopRot));
+    bot->setRotation(std::move(currBotRot));
 }
 
 

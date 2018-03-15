@@ -21,8 +21,8 @@
  * since it is simple and we don't need that much efficiency
  * */
 
-static const unsigned int SHADOW_WIDTH = 2000;
-static const unsigned int SHADOW_HEIGHT = 2000;
+static const unsigned int SHADOW_WIDTH = 4000;
+static const unsigned int SHADOW_HEIGHT = 4000;
 
 class Renderer
 {

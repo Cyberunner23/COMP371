@@ -6,7 +6,7 @@ void main() {
 
     if (false)
     {
-        outColor = vec4(vec3(gl_FragCoord.z), 1.0f);
+        outColor = vec4(vec3(0.5f), 1.0f);
     }
 
 }
