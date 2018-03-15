@@ -36,6 +36,11 @@ public:
 
     void setPolygonMode(GLenum polygonMode);
     void setTexRatio(float ratio);
+    void enableShadows(bool enabled)
+    {
+        _shadowsEnabled = enabled;
+    }
+
     Light& mutateLight();
     void addRenderObject(std::shared_ptr<IRenderNode> rootNode);
 
@@ -44,6 +49,7 @@ public:
 private:
 
     float _texRatio;
+    bool _shadowsEnabled = false;
     Light _light;
 
     std::shared_ptr<Camera> _mainCamera;

@@ -181,6 +181,13 @@ void Renderer::recursiveRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::shared_pt
             std::cout << "ERROR: failed to set the LightSpaceVP" << std::endl;
         }
 
+        //shadownEnabled
+        //float shadowVal = (_shadowsEnabled ? 1.0f : 0.0f);
+        //if (!_blendedShader->setUniform1f("shadowsEnabled", shadowVal));
+        //{
+        //    std::cout << "ERROR: failed to set the shadowsEnabled" << std::endl;
+        //}
+
     }
 
     glPolygonMode(GL_FRONT_AND_BACK, _polygonMode);

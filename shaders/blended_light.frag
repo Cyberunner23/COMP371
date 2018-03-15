@@ -19,6 +19,8 @@ uniform float diffuseStrength;
 uniform float specularStrength;
 uniform float shinyCoeff;
 
+//Shadow
+
 out vec4 outColor;
 
 float trueColorTexRatio = clamp(colorTexRatio, 0.0f, 1.0f);
@@ -38,7 +40,7 @@ float ShadowCalc(vec4 fragPosShadow)
 
     float bias = 0.00001;
 
-    return fragDepth > mapDepth + bias  ? 1.0 : 0.0;
+    return (fragDepth > mapDepth + bias) ? 1.0 : 0.0;
 }
 
 

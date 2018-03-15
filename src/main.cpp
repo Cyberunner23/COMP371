@@ -61,7 +61,7 @@ float texRatio = 0.0f;
 float lightHeight = 20.0f;
 Light light;
 
-
+bool enableShadows = false;
 bool doAnim = false;
 
 
@@ -355,6 +355,9 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
                     renderer->setTexRatio(texRatio);
                     break;
                 }
+                case GLFW_KEY_B:
+
+                    break;
                 case GLFW_KEY_W:
                 {
                     glm::vec3 hRotation = horse->getRotation();
