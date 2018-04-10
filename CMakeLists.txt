@@ -63,6 +63,8 @@ find_package(OpenGL REQUIRED)
 
 set(SRCS
     src/main.cpp
+    src/AnimationHandler.hpp
+    src/AnimationHandler.cpp
     src/Camera.hpp
     src/Camera.cpp
     src/Light.hpp

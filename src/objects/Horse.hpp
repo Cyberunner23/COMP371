@@ -21,7 +21,9 @@ class Horse : public IRenderNode
 {
 
 public:
+
     Horse();
+    Horse(glm::vec3 initPos, glm::vec3 initRot);
 
     void showAxis(bool active);
 

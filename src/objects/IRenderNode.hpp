@@ -31,6 +31,7 @@ public:
     void scale(const glm::vec3& scaling);
 
     glm::vec3 getRotation();
+    glm::vec3& mutateRotation() {return _rotation;}
     void setRotation(const glm::vec3&& rotation);
     void setRotation(const glm::vec3& rotation);
     void rotate(const glm::vec3& rotation);

@@ -117,6 +117,11 @@ Horse::Horse() : IRenderNode("Horse")
 
 }
 
+Horse::Horse(glm::vec3 initPos, glm::vec3 initRot) : Horse()
+{
+
+}
+
 void Horse::showAxis(bool active)
 {
     frontTorso->showAxis(active);
@@ -142,10 +147,10 @@ void Horse::tickAnim()
 {
     if (_doAnim)
     {
-        frFrameState = (frFrameState + 1) % _animLength;
-        flFrameState = (flFrameState + 1) % _animLength;
-        brFrameState = (brFrameState + 1) % _animLength;
-        blFrameState = (blFrameState + 1) % _animLength;
+        frFrameState = (frFrameState + 1) % _animLength; //3
+        flFrameState = (flFrameState + 1) % _animLength; //1
+        brFrameState = (brFrameState + 1) % _animLength; //2
+        blFrameState = (blFrameState + 1) % _animLength; //0
 
         frontLegFrame(frFrameState, frLegTop, frLegBot);
         frontLegFrame(flFrameState, flLegTop, flLegBot);
