@@ -1,7 +1,6 @@
 
 #include "AnimationHandler.hpp"
 
-
 AnimationModelKeyframe::AnimationModelKeyframe(float frameLength,
                                                float frLegTopRot,
                                                float frLegBotRot,
@@ -10,7 +9,9 @@ AnimationModelKeyframe::AnimationModelKeyframe(float frameLength,
                                                float brLegTopRot,
                                                float brLegBotRot,
                                                float blLegTopRot,
-                                               float blLegBotRot)
+                                               float blLegBotRot,
+                                               float neckRot,
+                                               float tailRot)
         : frameTime(frameLength)
         , frLegTopRot(frLegTopRot)
         , frLegBotRot(frLegBotRot)
@@ -20,23 +21,9 @@ AnimationModelKeyframe::AnimationModelKeyframe(float frameLength,
         , brLegBotRot(brLegBotRot)
         , blLegTopRot(blLegTopRot)
         , blLegBotRot(blLegBotRot)
+        , neckRot(neckRot)
+        , tailRot(tailRot)
 {}
-
-AnimationModelKeyframe::AnimationModelKeyframe()
-{
-    Horse horse;
-    this->frameTime = 1.0f;
-    this->frLegTopRot = horse.frLegTop->getRotation().z;
-    this->frLegBotRot = horse.frLegBot->getRotation().z;
-    this->flLegTopRot = horse.flLegTop->getRotation().z;
-    this->flLegBotRot = horse.flLegBot->getRotation().z;
-    this->brLegTopRot = horse.brLegTop->getRotation().z;
-    this->brLegBotRot = horse.brLegBot->getRotation().z;
-    this->blLegTopRot = horse.blLegTop->getRotation().z;
-    this->blLegBotRot = horse.blLegBot->getRotation().z;
-}
-
-
 
 AnimationHandler::AnimationHandler(std::vector<std::shared_ptr<Horse>> horses)
 {
@@ -63,9 +50,15 @@ void AnimationHandler::setAnimationType(AnimationType type)
 {
     for (AnimationState& state : _horseAnimStates)
     {
-        state.currentAnim = type;
-        state.timeCounter = 0.0f;
+        setAnimationType(type, state);
     }
+}
+
+void AnimationHandler::setAnimationType(AnimationType type, AnimationState &state)
+{
+    state.previousAnim = state.currentAnim;
+    state.currentAnim = type;
+    state.timeCounter = 0.0f;
 }
 
 
@@ -84,27 +77,26 @@ void AnimationHandler::tickModelAnim(float deltaTime)
     for (unsigned int i = 0; i < _horseAnimStates.size(); ++i)
     {
 
-        AnimationState* state = &_horseAnimStates[i];
         std::shared_ptr<Horse> horse = _horses[i];
-        if (!state->isAnimating)
+        if (!_horseAnimStates[i].isAnimating)
         {
             tickIdleAnim(horse);
             return;
         }
 
-        switch(state->currentAnim)
+        switch(_horseAnimStates[i].currentAnim)
         {
             case AnimationType::IDLE:
                 tickIdleAnim(horse);
                 break;
             case AnimationType::WALK:
-                tickWalkAnim(deltaTime, horse, *state);
+                tickWalkAnim(deltaTime, horse, i);
                 break;
             case AnimationType::RUN:
-                tickRunAnim(deltaTime, horse, *state);
+                tickRunAnim(deltaTime, horse, i);
                 break;
             case AnimationType::TURN:
-                tickTurnAnim(deltaTime, horse, *state);
+                tickTurnAnim(deltaTime, horse, i);
                 break;
         }
     }
@@ -115,28 +107,30 @@ void AnimationHandler::tickIdleAnim(std::shared_ptr<Horse> horse)
     applyModelKeyFrame(HorseIdleModelAnim[0], horse);
 }
 
-void AnimationHandler::tickWalkAnim(float deltaTime, std::shared_ptr<Horse> horse, AnimationState& state)
+void AnimationHandler::tickWalkAnim(float deltaTime, std::shared_ptr<Horse> horse, unsigned int& animStateIndex)
 {
 
-    float currentAnimTime = state.timeCounter + deltaTime;
+    float currentAnimTime = _horseAnimStates[animStateIndex].timeCounter + deltaTime;
     float walkAnimDuration = HorseWalkModelAnim.back().frameTime;
 
     if (currentAnimTime >= walkAnimDuration)
     {
         applyModelKeyFrame(HorseWalkModelAnim.back(), horse);
-        state.timeCounter = 0;
-        std::cout << "TODO: FINISH STOP COND WALK ANIM" << std::endl;
+        _horseAnimStates[animStateIndex].timeCounter = 0;
+        return;
     }
 
     AnimationModelKeyframe frame1;
     AnimationModelKeyframe frame2;
 
-    for (unsigned int i = 0; i < HorseWalkModelAnim.size() - 1; ++i)
+    for (unsigned int i = 1; i < HorseWalkModelAnim.size(); ++i)
     {
-        if (currentAnimTime > HorseWalkModelAnim[i].frameTime)
+        float timeim1 = HorseWalkModelAnim[i - i].frameTime;
+        float timei = HorseWalkModelAnim[i].frameTime;
+        if (currentAnimTime < timei && currentAnimTime > timeim1)
         {
-            frame1 = HorseWalkModelAnim[i];
-            frame2 = HorseWalkModelAnim[i + 1];
+            frame1 = HorseWalkModelAnim[i - 1];
+            frame2 = HorseWalkModelAnim[i];
             break;
         }
     }
@@ -144,86 +138,102 @@ void AnimationHandler::tickWalkAnim(float deltaTime, std::shared_ptr<Horse> hors
     float ratio = (currentAnimTime - frame1.frameTime) / (frame2.frameTime - frame1.frameTime);
     applyModelKeyFrame(ratio, frame1, frame2, horse);
 
-    //
+    _horseAnimStates.at(animStateIndex).timeCounter += deltaTime;
+}
 
-    /*
- *
-    //if were at or past the end time for the rotate anim, set to end of anim and set anim to previous anim
-    if (currentAnimTime >= RotateAnimDuration)
+void AnimationHandler::tickRunAnim(float deltaTime, std::shared_ptr<Horse> horse, unsigned int& animStateIndex)
+{
+
+    float currentAnimTime = _horseAnimStates[animStateIndex].timeCounter + deltaTime;
+    float walkAnimDuration = HorseRunModelAnim.back().frameTime;
+
+    if (currentAnimTime >= walkAnimDuration)
     {
-        horse->mutateRotation().y = state.initRotation + state.rotateDir * RotateSpeed * RotateAnimDuration;
-        state.timeCounter = 0.0f;
-        state.currentAnim = state.previousAnim;
-        state.previousAnim = AnimationType::TURN;
-        state.initRotation = horse->getRotation().y;
+        applyModelKeyFrame(HorseRunModelAnim.back(), horse);
+        _horseAnimStates[animStateIndex].timeCounter = 0;
         return;
     }
-    */
 
-}
+    AnimationModelKeyframe frame1;
+    AnimationModelKeyframe frame2;
 
-void AnimationHandler::tickRunAnim(float deltaTime, std::shared_ptr<Horse> horse, AnimationState& state)
-{
-
-    float currentAnimTime = state.timeCounter + deltaTime;
-    float runAnimDuration = HorseRunModelAnim.back().frameTime;
-
-
-
-}
-
-void AnimationHandler::tickTurnAnim(float deltaTime, std::shared_ptr<Horse> horse, AnimationState& state)
-{
-
-    float currentAnimTime = state.timeCounter + deltaTime;
-
-    if (state.timeCounter == 0.0f)
+    for (unsigned int i = 1; i < HorseRunModelAnim.size(); ++i)
     {
-        //Beginning of anim
+        float timeim1 = HorseRunModelAnim[i - i].frameTime;
+        float timei = HorseRunModelAnim[i].frameTime;
+        if (currentAnimTime < timei && currentAnimTime > timeim1)
+        {
+            frame1 = HorseRunModelAnim[i - 1];
+            frame2 = HorseRunModelAnim[i];
+            break;
+        }
+    }
+
+    float ratio = (currentAnimTime - frame1.frameTime) / (frame2.frameTime - frame1.frameTime);
+    applyModelKeyFrame(ratio, frame1, frame2, horse);
+
+    _horseAnimStates.at(animStateIndex).timeCounter += deltaTime;
+
+}
+
+void AnimationHandler::tickTurnAnim(float deltaTime, std::shared_ptr<Horse> horse, unsigned int& animStateIndex)
+{
+
+    float currentAnimTime = _horseAnimStates[animStateIndex].timeCounter + deltaTime;
+
+    if (_horseAnimStates[animStateIndex].timeCounter == 0.0f)
+    {
         //Randomize turn direction.
-        std::cout << "TODO: RANDOMIZE TURN DIR" << std::endl;
+        _horseAnimStates[animStateIndex].rotateDir = (_bernoulli(_randomGen)) == 1 ? 1 : -1;
+        std::cout << "rotate dir: " << _horseAnimStates[animStateIndex].rotateDir << std::endl;
     }
 
     //if were at or past the end time for the rotate anim, set to end of anim and set anim to previous anim
     if (currentAnimTime >= RotateAnimDuration)
     {
-        horse->mutateRotation().y = state.initRotation + state.rotateDir * RotateSpeed * RotateAnimDuration;
-        state.timeCounter = 0.0f;
-        state.currentAnim = state.previousAnim;
-        state.previousAnim = AnimationType::TURN;
-        state.initRotation = horse->getRotation().y;
+        horse->setRotY(_horseAnimStates[animStateIndex].initRotation + _horseAnimStates[animStateIndex].rotateDir * RotateSpeed * RotateAnimDuration);
+        _horseAnimStates[animStateIndex].timeCounter = 0.0f;
+        _horseAnimStates[animStateIndex].currentAnim = _horseAnimStates[animStateIndex].previousAnim;
+        _horseAnimStates[animStateIndex].previousAnim = AnimationType::TURN;
+        _horseAnimStates[animStateIndex].initRotation = horse->getRotation().y;
         return;
     }
 
     //Step anim
     float totalDegrees = RotateSpeed * RotateAnimDuration;
-    float rotation = totalDegrees * (currentAnimTime / RotateAnimDuration);
+    float rotation = _horseAnimStates[animStateIndex].rotateDir * totalDegrees * (currentAnimTime / RotateAnimDuration);
 
-    horse->mutateRotation().y = state.initRotation + rotation;
+    _horseAnimStates[animStateIndex].timeCounter = currentAnimTime;
+
+    horse->setRotY(_horseAnimStates[animStateIndex].initRotation + rotation);
 }
 
 void AnimationHandler::applyModelKeyFrame(AnimationModelKeyframe keyframe, std::shared_ptr<Horse> horse)
 {
-    horse->frLegTop->mutateRotation().z = keyframe.frLegTopRot;
-    horse->frLegBot->mutateRotation().z = keyframe.frLegBotRot;
-    horse->flLegTop->mutateRotation().z = keyframe.flLegTopRot;
-    horse->flLegBot->mutateRotation().z = keyframe.flLegBotRot;
-    horse->brLegTop->mutateRotation().z = keyframe.brLegTopRot;
-    horse->brLegBot->mutateRotation().z = keyframe.brLegBotRot;
-    horse->blLegTop->mutateRotation().z = keyframe.blLegTopRot;
-    horse->blLegBot->mutateRotation().z = keyframe.blLegBotRot;
+    horse->frLegTop->setRotZ(keyframe.frLegTopRot);
+    horse->frLegBot->setRotZ(keyframe.frLegBotRot);
+    horse->flLegTop->setRotZ(keyframe.flLegTopRot);
+    horse->flLegBot->setRotZ(keyframe.flLegBotRot);
+    horse->brLegTop->setRotZ(keyframe.brLegTopRot);
+    horse->brLegBot->setRotZ(keyframe.brLegBotRot);
+    horse->blLegTop->setRotZ(keyframe.blLegTopRot);
+    horse->blLegBot->setRotZ(keyframe.blLegBotRot);
+    horse->neck->setRotZ(keyframe.neckRot);
+    horse->tail->setRotZ(keyframe.tailRot);
 }
 
 void AnimationHandler::applyModelKeyFrame(float ratio, AnimationModelKeyframe keyframe1, AnimationModelKeyframe keyframe2, std::shared_ptr<Horse> horse)
 {
-    horse->frLegTop->mutateRotation().z = ratio * keyframe1.frLegTopRot + (1 - ratio) * keyframe2.frLegTopRot;
-    horse->frLegBot->mutateRotation().z = ratio * keyframe1.frLegBotRot + (1 - ratio) * keyframe2.frLegBotRot;
-    horse->flLegTop->mutateRotation().z = ratio * keyframe1.flLegTopRot + (1 - ratio) * keyframe2.flLegTopRot;
-    horse->flLegBot->mutateRotation().z = ratio * keyframe1.flLegBotRot + (1 - ratio) * keyframe2.flLegBotRot;
-    horse->brLegTop->mutateRotation().z = ratio * keyframe1.brLegTopRot + (1 - ratio) * keyframe2.brLegTopRot;
-    horse->brLegBot->mutateRotation().z = ratio * keyframe1.brLegBotRot + (1 - ratio) * keyframe2.brLegBotRot;
-    horse->blLegTop->mutateRotation().z = ratio * keyframe1.blLegTopRot + (1 - ratio) * keyframe2.blLegTopRot;
-    horse->blLegBot->mutateRotation().z = ratio * keyframe1.blLegBotRot + (1 - ratio) * keyframe2.blLegBotRot;
+    horse->frLegTop->setRotZ(keyframe1.frLegTopRot + ratio * (keyframe2.frLegTopRot - keyframe1.frLegTopRot));
+    horse->frLegBot->setRotZ(keyframe1.frLegBotRot + ratio * (keyframe2.frLegBotRot - keyframe1.frLegBotRot));
+    horse->flLegTop->setRotZ(keyframe1.flLegTopRot + ratio * (keyframe2.flLegTopRot - keyframe1.flLegTopRot));
+    horse->flLegBot->setRotZ(keyframe1.flLegBotRot + ratio * (keyframe2.flLegBotRot - keyframe1.flLegBotRot));
+    horse->brLegTop->setRotZ(keyframe1.brLegTopRot + ratio * (keyframe2.brLegTopRot - keyframe1.brLegTopRot));
+    horse->brLegBot->setRotZ(keyframe1.brLegBotRot + ratio * (keyframe2.brLegBotRot - keyframe1.brLegBotRot));
+    horse->blLegTop->setRotZ(keyframe1.blLegTopRot + ratio * (keyframe2.blLegTopRot - keyframe1.blLegTopRot));
+    horse->blLegBot->setRotZ(keyframe1.blLegBotRot + ratio * (keyframe2.blLegBotRot - keyframe1.blLegBotRot));
+    horse->neck->setRotZ(keyframe1.neckRot + ratio * (keyframe2.neckRot - keyframe1.neckRot));
+    horse->tail->setRotZ(keyframe1.tailRot + ratio * (keyframe2.tailRot - keyframe1.tailRot));
 }
 
 
@@ -231,6 +241,8 @@ void AnimationHandler::applyModelKeyFrame(float ratio, AnimationModelKeyframe ke
 
 void AnimationHandler::tickMovementAnim(float deltaTime)
 {
+
+
 
 }
 
@@ -243,7 +255,7 @@ void AnimationHandler::tickCollisionDetect()
 
     for (unsigned int i = 0; i < _horses.size(); ++i)
     {
-        for (unsigned int j = 0; i < _horses.size(); ++j)
+        for (unsigned int j = 0; j < _horses.size(); ++j)
         {
 
             if (i == j) {continue;}
@@ -268,5 +280,4 @@ float AnimationHandler::getDistance(std::shared_ptr<Horse> horse1, std::shared_p
             + glm::pow(pos2.y - pos1.y, 2)
             + glm::pow(pos2.z - pos1.z, 2));
 }
-
 

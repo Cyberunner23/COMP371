@@ -9,6 +9,7 @@
 #include "glm/common.hpp"
 #include "GLFW/glfw3.h"
 
+#include "AnimationHandler.hpp"
 #include "Camera.hpp"
 #include "Renderer.hpp"
 #include "Window.hpp"
@@ -43,28 +44,9 @@ std::unique_ptr<Window> mainWindow;
 std::unique_ptr<Renderer> renderer;
 std::shared_ptr<SceneRoot> sceneRoot;
 std::vector<std::shared_ptr<Horse>> horses;
-std::shared_ptr<Horse> horses1;
-std::shared_ptr<Horse> horse2;
-std::shared_ptr<Horse> horse3;
-std::shared_ptr<Horse> horse4;
-std::shared_ptr<Horse> horse5;
-std::shared_ptr<Horse> horse6;
-std::shared_ptr<Horse> horse7;
-std::shared_ptr<Horse> horse8;
-std::shared_ptr<Horse> horse9;
-std::shared_ptr<Horse> horses10;
-std::shared_ptr<Horse> horses11;
-std::shared_ptr<Horse> horses12;
-std::shared_ptr<Horse> horses13;
-std::shared_ptr<Horse> horses14;
-std::shared_ptr<Horse> horses15;
-std::shared_ptr<Horse> horses16;
-std::shared_ptr<Horse> horses17;
-std::shared_ptr<Horse> horses18;
-std::shared_ptr<Horse> horses19;
-std::shared_ptr<Horse> horse20;
 std::shared_ptr<Camera> camera;
 std::shared_ptr<LightObject> lightObj;
+std::shared_ptr<AnimationHandler> animationHandler;
 
 
 bool isLMouseButtonPressed;
@@ -166,12 +148,19 @@ int main(int argc, char** argv)
 
     unsigned int tickSkip = 0;
 
+    animationHandler = std::make_shared<AnimationHandler>(horses);
+
+    animationHandler->setAnimationType(AnimationType::RUN);
+
     //Render loop
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     while (!mainWindow->shouldClose())
     {
         delta = glm::abs(prevTime - glfwGetTime());
         prevTime = glfwGetTime();
+
+
+        animationHandler->tick((float)delta);
 
         sleepFor = FPSIntervalDuration - delta;
         if (sleepFor < 0)
@@ -210,7 +199,7 @@ void initHorses()
     std::uniform_int_distribution<int> posDistrib(-10, 10);
     std::uniform_int_distribution<int> rotDistrib(0   ,360);
 
-    for (unsigned int i = 0; i < 20; ++i)
+    for (unsigned int i = 0; i < 1; ++i)
     {
         float x = posDistrib(generator);
         float z = posDistrib(generator);
@@ -247,13 +236,35 @@ void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods
                 switch (key)
                 {
                     case GLFW_KEY_Q:
+                    {
                         glfwSetWindowShouldClose(window, GLFW_TRUE);
                         break;
+                    }
                     case GLFW_KEY_D:
                     {
                         static bool showAxis = false;
                         showAxis = !showAxis;
                         horses[0]->showAxis(showAxis);
+                    }
+                    case GLFW_KEY_I:
+                    {
+                        animationHandler->setAnimationType(AnimationType::IDLE);
+                        break;
+                    }
+                    case GLFW_KEY_W:
+                    {
+                        animationHandler->setAnimationType(AnimationType::WALK);
+                        break;
+                    }
+                    case GLFW_KEY_R:
+                    {
+                        animationHandler->setAnimationType(AnimationType::RUN);
+                        break;
+                    }
+                    case GLFW_KEY_T:
+                    {
+                        animationHandler->setAnimationType(AnimationType::TURN);
+                        break;
                     }
                     default:
                         break;
