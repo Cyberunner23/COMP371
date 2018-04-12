@@ -26,14 +26,20 @@ AnimationModelKeyframe::AnimationModelKeyframe(float frameLength,
 {}
 
 AnimationHandler::AnimationHandler(std::vector<std::shared_ptr<Horse>> horses)
+        : _randomGen(std::random_device()())
+        , _speedDistrib(1.0f, 5.0f)
+        , _distanceDistrib(10.0f, 30.0f)
 {
     _horses = horses;
 
     for (std::shared_ptr<Horse> horse : _horses)
     {
-        AnimationState state{};
+        AnimationState state {};
         state.initRotation = horse->getRotation().y;
         _horseAnimStates.push_back(state);
+
+        MovementState mState {};
+        _horseMovementStates.push_back(mState);
     }
 }
 
@@ -41,6 +47,11 @@ AnimationHandler::AnimationHandler(std::vector<std::shared_ptr<Horse>> horses)
 void AnimationHandler::enableAnimations(bool value)
 {
     for (AnimationState& state : _horseAnimStates)
+    {
+        state.isAnimating = value;
+    }
+
+    for (MovementState& state : _horseMovementStates)
     {
         state.isAnimating = value;
     }
@@ -65,7 +76,7 @@ void AnimationHandler::setAnimationType(AnimationType type, AnimationState &stat
 void AnimationHandler::tick(float deltaTime)
 {
     tickModelAnim(deltaTime);
-    tickMovementAnim(deltaTime);
+    //tickMovementAnim(deltaTime);
     tickCollisionDetect();
 }
 
@@ -242,7 +253,51 @@ void AnimationHandler::applyModelKeyFrame(float ratio, AnimationModelKeyframe ke
 void AnimationHandler::tickMovementAnim(float deltaTime)
 {
 
+    for (unsigned int i = 0; i < _horseAnimStates.size(); ++i)
+    {
 
+        //if colliding and not the one to move, skip move anim tick
+        if (_horseAnimStates[i].isColliding && !_horseAnimStates[i].isChosenToMove) {continue;}
+
+        //If turning, dont move
+        if (_horseAnimStates[i].currentAnim == AnimationType::TURN) {continue;}
+
+        //If were done, start the turn animation
+        if (_horseAnimStates[i].movementTimeCounter > _horseMovementStates[i].movementLength)
+        {
+            //We have reached the end of the movement phase, time to turn
+            _horseAnimStates[i].movementTimeCounter = 0;
+            _horseAnimStates[i].previousAnim = _horseAnimStates[i].currentAnim;
+            _horseAnimStates[i].currentAnim = AnimationType::TURN;
+            continue;
+        }
+
+        //If beginning of movement
+        if (_horseAnimStates[i].currentAnim != AnimationType::TURN && _horseAnimStates[i].movementTimeCounter == 0.0f)
+        {
+            _horseAnimStates[i].movementSpeed = (float)_speedDistrib(_randomGen);
+            _horseAnimStates[i].movementLength = (float)_distanceDistrib(_randomGen);
+        }
+
+
+        //do the movement
+
+        float currentTime = _horseAnimStates[i].movementTimeCounter + deltaTime;
+        float currentAngle = _horses[i]->getRotation().y;
+        float distanceToMove = deltaTime * _horseAnimStates[i].movementSpeed;
+
+        std::cout << "deltatime: " << deltaTime << " movementspeed: " << _horseAnimStates[i].movementSpeed << std::endl;
+
+        float dx = distanceToMove * glm::cos(currentAngle);
+        float dz = distanceToMove * glm::sin(currentAngle);
+
+        _horses[i]->translate(glm::vec3(dx, 0.0f, dz));
+
+        std::cout << "Translated by x: " << dx << " z: " << dz << std::endl;
+
+        std::cout << "oldtime: " << _horseAnimStates[i].movementTimeCounter << " newtime: " << currentTime << std::endl;
+        _horseAnimStates[i].movementTimeCounter = currentTime;
+    }
 
 }
 
@@ -253,6 +308,31 @@ void AnimationHandler::tickMovementAnim(float deltaTime)
 void AnimationHandler::tickCollisionDetect()
 {
 
+    //clear flags if no longer colliding
+    for (unsigned int i = 0; i < _horseAnimStates.size(); ++i)
+    {
+        if (_horseAnimStates[i].isColliding)
+        {
+            bool isStillColliding = false;
+            for (unsigned int j = 0; j < _horseAnimStates.size(); ++j)
+            {
+                if (i == j) {continue;}
+
+                if (getDistance(_horses[i], _horses[j]) < HorseRadius)
+                {
+                    isStillColliding = true;
+                }
+
+                if (!isStillColliding)
+                {
+                    _horseAnimStates[i].isChosenToMove = false;
+                    _horseAnimStates[i].isColliding = false;
+                }
+            }
+        }
+    }
+
+    //Check for collisions
     for (unsigned int i = 0; i < _horses.size(); ++i)
     {
         for (unsigned int j = 0; j < _horses.size(); ++j)
@@ -263,11 +343,22 @@ void AnimationHandler::tickCollisionDetect()
             if (getDistance(_horses[i], _horses[j]) < HorseRadius)
             {
                 std::cout << "Collision detected between horses " << i << " and " << j << std::endl;
-            }
+                bool selection = _bernoulli(_randomGen) == 0;
 
+                _horseAnimStates[i].isColliding = true;
+                _horseAnimStates[j].isColliding = true;
+
+                if (selection)
+                {
+                    _horseAnimStates[i].isChosenToMove = true;
+                }
+                else
+                {
+                    _horseAnimStates[j].isChosenToMove = true;
+                }
+            }
         }
     }
-
 }
 
 float AnimationHandler::getDistance(std::shared_ptr<Horse> horse1, std::shared_ptr<Horse> horse2)

@@ -1,0 +1,85 @@
+
+
+COMP 371 report by Alex Frappier Lachapelle
+
+Extra controls:
+
+Ctrl + Q: quit
+Ctrl + W: Forces the horses into the walk animation
+Ctrl + R: Forces the horses into the run animation
+Ctrl + I: Forces the horses into the idle animation
+Ctrl + D: Show axis lines for each component on horse #0
+
+
+Report:
+
+Note that I didn't have time to completely finish the project.
+I have a very heavy course load this semester and had difficulty keeping up...
+All major parts are implemented but are buggy.
+
+During the creation of this project I encountered various issues. These include:
+
+- Shadows:
+  After implementing the 2 pass shadow algorithm, shadows would simply not appear.
+  I used the linux-gfx-debugger by NVidia to verify the contents of the
+  depth buffer for the first pass, it showed to be empty.
+  I repositioned the camera used for this render pass so that it looked
+  downward onto the floor. Verifying once again with the linux-gfx-debugger
+  the first pass was rendering properly, yet no shadows were appearing.
+  I then verified my shaders and notices some of the math was off.
+  After some corrections as well as verification of the parameters I was
+  passing to the shaders, the shadows would render.
+  There are still some issues though. When moving the plane the shadows
+  update incorrectly, that is because the camera used for the first pass
+  would not move with the world. I wanted to correct this however I
+  prioritized the remainder of the project, for this reason the
+  shadows are still buggy.
+
+
+- Lighting:
+  As well as shadowing, the lighting still has some issues. The specular
+  component is not displayed correctly, mainly because of the
+  main camera position is being passed to the shader incorrectly. Much
+  like the shadowing, I dod not manage to have the time to debug and
+  current the issue. The specular component is still there but its only
+  visible when rotating the world to a rather extreme angle.
+  It seems like the transformation of the camera position relative to the
+  world is being done incorrectly. Since cameras are not considered
+  as objects the transformations are not done automatically by the
+  hierarchical rendering mechanism requiring me to do the transformation
+  manually which induced errors. One possible solution is to handle the camera
+  as a non renderable entity that still a part of the hierarchical tree of the scene.
+  This could be done by either having a separate tree for special objects that is
+  somehow linked to the renderable tree or having a flag in which the renderer
+  would only apply the positional transforms and not render the object.
+
+
+- Hierarchical rendering:
+  I had issues at first with the hierarchical rendering, mainly
+  with the transformations being applied to the child parts.
+  Transformations were being applies incorrectly but then redoing the
+  math and multiplication order of the matrices the hierarchical rendering
+  worked perfectly.
+
+- Animation:
+  I didn't have much of an issue with animating the horse itself.
+  At first I hardcoded some keyframes and moved through them without
+  any interpolation every few frames. For the project I implemented
+  a keyframe system with interpolation based on time. It was rather
+  simple to implement. However for the translation of the horse, that was
+  much more challenging. Since the distance and speed that the horses
+  go are randomized I couldn't simply hardcode keyframes. I attempted
+  to handle the translation animation separately. I ran out of time to
+  completely implement this part. The code is written but is buggy
+  and has been commented out. One of the issues importantly comes
+  to the comparison with the animations current play time versus
+  the overall time the animation should play for, I would check to
+  see if the play time was longer than the total play time it
+  should play for. If so then we would handle the case where the
+  animation has finished ans started the turn animation.
+  By debugging that part of the code I discovered that even though
+  the if statement should have evaluated to false the if statement
+  fired anyways. For this reason the translation animations aren't
+  working. At the time or writing this report I am unable to explain
+  the abnormal behavior of the floating point comparison.
+

@@ -64,6 +64,12 @@ enum class AnimationType
     TURN
 };
 
+enum class MovementPhase
+{
+    WALKING,
+    TURNING
+};
+
 struct AnimationState
 {
     float timeCounter = 0.0f;
@@ -74,6 +80,24 @@ struct AnimationState
     unsigned int currentRepeat = 0;
     AnimationType currentAnim  = AnimationType::IDLE;
     AnimationType previousAnim = AnimationType::IDLE;
+
+    //Movement
+    bool isColliding = false;
+    bool isChosenToMove = false;
+    float movementTimeCounter = 0.0f;
+    float movementLength = 0.0f;
+    float movementSpeed = 0.0f;
+};
+
+struct MovementState
+{
+    bool isAnimating = true;
+    bool isColliding = false;
+    bool isChosenToMove = false;
+    float timeCounter = 0.0f;
+    float movementLength = 0.0f;
+    float movementSpeed = 0.0f;
+    MovementPhase movementPhase = MovementPhase::WALKING;
 };
 
 
@@ -127,9 +151,12 @@ private:
 
     std::vector<std::shared_ptr<Horse>> _horses;
     std::vector<AnimationState> _horseAnimStates;
+    std::vector<MovementState>  _horseMovementStates;
 
     std::mt19937 _randomGen;
     std::bernoulli_distribution _bernoulli;
+    std::uniform_real_distribution<> _speedDistrib;
+    std::uniform_real_distribution<> _distanceDistrib;
 
     void tickModelAnim(float deltaTime);
     void tickIdleAnim(std::shared_ptr<Horse> horse);

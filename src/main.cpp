@@ -199,7 +199,7 @@ void initHorses()
     std::uniform_int_distribution<int> posDistrib(-10, 10);
     std::uniform_int_distribution<int> rotDistrib(0   ,360);
 
-    for (unsigned int i = 0; i < 1; ++i)
+    for (unsigned int i = 0; i < 20; ++i)
     {
         float x = posDistrib(generator);
         float z = posDistrib(generator);
