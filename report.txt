@@ -8,6 +8,7 @@ Ctrl + Q: quit
 Ctrl + W: Forces the horses into the walk animation
 Ctrl + R: Forces the horses into the run animation
 Ctrl + I: Forces the horses into the idle animation
+Ctrl + T: Forces the horses into the turn animation, upon completion it goes to the previous animation
 Ctrl + D: Show axis lines for each component on horse #0
 
 
