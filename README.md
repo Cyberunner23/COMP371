@@ -31,3 +31,8 @@ the requirements found in the Assignments/ProgrammingAssignment1.pdf file.
  
 #### To run
  * Simply execute the COMP371 executable that is generated once the build is complete
+
+### Report
+
+ The report highlighting the extra controls and the difficulties encountered 
+ during the project is found in ```report.txt```
