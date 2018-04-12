@@ -173,5 +173,4 @@ private:
     void tickCollisionDetect();
     float getDistance(std::shared_ptr<Horse> horse1, std::shared_ptr<Horse> horse2);
 
-
 };

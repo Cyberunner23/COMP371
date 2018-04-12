@@ -108,11 +108,7 @@ void Renderer::recursiveShadowRender(glm::mat4 vpMatrix, glm::mat4 CTM, std::sha
         std::cout << "ERROR: failed to set the MVP" << std::endl;
     }
 
-
-    //glClear(GL_DEPTH_BUFFER_BIT);
     glDrawArrays(currentNode->getRenderMode(), 0, (GLsizei)currentNode->getMeshSize());
-
-
 
     //Recurse down the tree, render the child objects
     for (std::shared_ptr<IRenderNode> const &node : *children)

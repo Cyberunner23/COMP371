@@ -87,15 +87,12 @@ bool Shader::setTexture(int location, std::string uniformName, GLuint texID)
     {
         case 0:
             glActiveTexture(GL_TEXTURE0);
-            //std::cout << "GL_TEXTURE0" << std::endl;
             break;
         case 1:
             glActiveTexture(GL_TEXTURE1);
-            //std::cout << "GL_TEXTURE1" << std::endl;
             break;
         case 2:
             glActiveTexture(GL_TEXTURE2);
-            //std::cout << "GL_TEXTURE2" << std::endl;
             break;
     }
 

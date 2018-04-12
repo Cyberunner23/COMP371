@@ -38,17 +38,3 @@ private:
     glm::mat4 computeViewProjectionMatrix();
 
 };
-
-
-
-/*struct Camera
-{
-
-    glm::vec3 camPos;
-    glm::vec3 camRot;
-
-
-    Camera();
-
-    glm::mat4 computeViewMat();
-};*/

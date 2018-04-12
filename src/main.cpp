@@ -146,8 +146,6 @@ int main(int argc, char** argv)
     double FPSIntervalDuration = 1.0 / FPS;
     double sleepFor = 0.0;
 
-    unsigned int tickSkip = 0;
-
     animationHandler = std::make_shared<AnimationHandler>(horses);
 
     animationHandler->setAnimationType(AnimationType::RUN);
@@ -167,13 +165,6 @@ int main(int argc, char** argv)
         {
             sleepFor = 0;
         }
-
-        if (tickSkip == 0)
-        {
-            //horses[0]->tickAnim();
-        }
-
-        tickSkip = (tickSkip + 1) % 20;
 
         std::this_thread::sleep_for(std::chrono::milliseconds((long)(sleepFor * 1000)));
 

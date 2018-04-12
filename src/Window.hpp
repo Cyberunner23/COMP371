@@ -13,7 +13,7 @@ class Window
 
 public:
 
-    explicit Window(int width, int height, const std::string &windowTitle);
+    Window(int width, int height, const std::string &windowTitle);
     ~Window();
 
     void onWindowResize(int width, int height);

@@ -2,7 +2,7 @@
 COMP 371: Computer Graphics
 ===========================
 
-## Assignment 1
+## Project
 
 This repository contains my code for the first Computer Graphics assignment.
 <br/>  In terms of feature and operation, the program is designed to follow
